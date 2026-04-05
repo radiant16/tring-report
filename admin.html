@@ -197,23 +197,10 @@
   <a href="index.html" class="back-link">← 閲覧画面</a>
 </div>
 
-<!-- Login screen -->
-<div class="login-wrap" id="loginWrap">
-  <div class="login-card">
-    <div class="login-title">🔐 オーナーログイン</div>
-    <div class="login-sub">パスワードを入力してください</div>
-    <div class="field">
-      <label>パスワード</label>
-      <input type="password" id="pwInput" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
-    </div>
-    <div style="height:16px"></div>
-    <button class="btn-primary" onclick="doLogin()">ログイン</button>
-    <div id="loginError" style="color:#a04848;font-size:12px;margin-top:10px;text-align:center;display:none;">パスワードが違います</div>
-  </div>
-</div>
+
 
 <!-- Admin content (hidden until login) -->
-<div id="adminContent" style="display:none;">
+<div id="adminContent">
 
   <!-- Month tabs -->
   <div class="month-tabs" id="monthTabs"></div>
@@ -231,9 +218,6 @@
 <div class="toast" id="toast"></div>
 
 <script>
-// ══ パスワード（変更可能） ══
-const PASSWORD = 'tring2025';
-
 // ══ スタッフ定義（固定） ══
 const STAFF_DEF = [
   {name:'山下 大貴', role:'Top Stylist', ini:'山下', bg:'rgba(212,184,150,.15)', tc:'#d4b896'},
@@ -256,20 +240,6 @@ const MONTHS = [
 ];
 
 let currentMonth = '2025-03';
-
-// ══ ログイン ══
-function doLogin() {
-  const pw = document.getElementById('pwInput').value;
-  if (pw === PASSWORD) {
-    document.getElementById('loginWrap').style.display = 'none';
-    document.getElementById('adminContent').style.display = 'block';
-    buildMonthTabs();
-    buildForm();
-  } else {
-    document.getElementById('loginError').style.display = 'block';
-    document.getElementById('pwInput').value = '';
-  }
-}
 
 // ══ 月タブ ══
 function buildMonthTabs() {
@@ -514,6 +484,10 @@ function showToast(msg) {
   t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'), 2500);
 }
+
+// ══ 初期化 ══
+buildMonthTabs();
+buildForm();
 </script>
 </body>
 </html>

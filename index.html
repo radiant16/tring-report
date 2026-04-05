@@ -441,7 +441,24 @@ const DATA = {
   }
 };
 
-// ══ スライド ══
+// ══ localStorage からデータ取得（なければハードコードのサンプルを使用） ══
+function loadData(key) {
+  const raw = localStorage.getItem('tring_' + key);
+  if (raw) {
+    const d = JSON.parse(raw);
+    // salesPrev / avgPrev を自動計算
+    const keys = MONTHS.map(m=>m.key);
+    const idx = keys.indexOf(key);
+    const prevKey = idx > 0 ? keys[idx-1] : null;
+    const prev = prevKey ? loadData(prevKey) : null;
+    d.salesPrev   = prev ? prev.sales    : d.sales;
+    d.clientsPrev = prev ? prev.clients  : d.clients;
+    d.avgPrev     = prev ? Math.round(prev.sales/prev.clients||0) : Math.round(d.sales/d.clients||0);
+    d.avgPrice    = d.clients ? Math.round(d.sales/d.clients) : 0;
+    return d;
+  }
+  return DATA[key];
+}
 let currentIdx=0;
 const track=document.getElementById('slidesTrack');
 function goTo(idx,animate=true,ox,oy){
@@ -512,7 +529,7 @@ function prevKey(){const i=MONTHS.findIndex(m=>m.key===currentMonth);return i>0?
 
 function renderAll(){
   document.querySelectorAll('.kpi-card.expanded').forEach(c=>c.classList.remove('expanded'));
-  const d=DATA[currentMonth];
+  const d = loadData(currentMonth);
 
   document.getElementById('kpi-sales').textContent=fmtYen(d.sales);
   setBadge('kpi-sales-badge',d.sales,d.salesPrev);

@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>T ring 天王町 — 管理画面</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:     #8a8680;
+    --bg2:    #6e6a65;
+    --card:   #ffffff;
+    --border: #dddad5;
+    --ink:    #2a2825;
+    --muted:  #888078;
+    --gold:   #9a7e5a;
+    --gold-l: #b89a70;
+    --sage:   #4e8a68;
+    --rose:   #a04848;
+    --radius: 14px;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body {
+    font-family:'Meiryo','メイリオ','Hiragino Kaku Gothic ProN',sans-serif;
+    background:var(--bg); color:var(--ink); min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ── Header ── */
+  .header {
+    background:var(--bg2); padding:52px 20px 14px;
+    position:sticky; top:0; z-index:10;
+    border-bottom:1px solid rgba(0,0,0,.15);
+    display:flex; justify-content:space-between; align-items:center;
+  }
+  .header-title {
+    font-family:'Cormorant Garamond',serif;
+    font-style:italic; font-weight:300;
+    font-size:20px; color:#fff; letter-spacing:.06em;
+  }
+  .header-sub { font-size:9px; color:rgba(255,255,255,.5); letter-spacing:.18em; text-transform:uppercase; margin-top:3px; }
+  .back-link {
+    font-size:11px; color:rgba(255,255,255,.7); letter-spacing:.06em;
+    text-decoration:none; border:1px solid rgba(255,255,255,.3);
+    padding:5px 12px; border-radius:20px;
+  }
+
+  /* ── Login screen ── */
+  .login-wrap {
+    display:flex; align-items:center; justify-content:center;
+    min-height:calc(100vh - 88px); padding:20px;
+  }
+  .login-card {
+    background:var(--card); border-radius:var(--radius);
+    padding:32px 24px; width:100%; max-width:340px;
+    box-shadow:0 8px 32px rgba(0,0,0,.12);
+  }
+  .login-title { font-size:16px; font-weight:500; color:var(--ink); margin-bottom:6px; }
+  .login-sub   { font-size:12px; color:var(--muted); margin-bottom:24px; }
+
+  /* ── Form parts ── */
+  .form-section {
+    background:var(--card); border-radius:var(--radius);
+    margin:12px; padding:20px;
+    box-shadow:0 2px 8px rgba(0,0,0,.06);
+  }
+  .form-section-title {
+    font-size:13px; font-weight:500; color:var(--ink);
+    margin-bottom:16px; padding-bottom:10px;
+    border-bottom:2px solid var(--border);
+    display:flex; align-items:center; gap:8px;
+  }
+  .form-section-title .dot {
+    width:8px; height:8px; border-radius:50%;
+    background:var(--gold);
+  }
+
+  .field { margin-bottom:14px; }
+  .field:last-child { margin-bottom:0; }
+  .field label {
+    display:block; font-size:11px; color:var(--muted);
+    margin-bottom:5px; letter-spacing:.04em;
+  }
+  .field input {
+    width:100%; padding:10px 12px;
+    border:1px solid var(--border); border-radius:10px;
+    font-size:15px; font-family:inherit; color:var(--ink);
+    background:#faf9f7;
+    -webkit-appearance:none; appearance:none;
+    transition:border-color .2s;
+  }
+  .field input:focus { outline:none; border-color:var(--gold); }
+  .field input[type="password"] { font-size:20px; letter-spacing:4px; }
+
+  .field-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+
+  /* staff grid */
+  .staff-grid { display:flex; flex-direction:column; gap:14px; }
+  .staff-block {
+    border:1px solid var(--border); border-radius:10px;
+    overflow:hidden;
+  }
+  .staff-block-header {
+    background:#f5f3f0; padding:10px 14px;
+    font-size:12px; font-weight:500; color:var(--ink);
+    display:flex; align-items:center; gap:8px;
+  }
+  .staff-block-body { padding:12px 14px; display:flex; flex-direction:column; gap:10px; }
+  .staff-avatar {
+    width:24px; height:24px; border-radius:6px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:11px; font-weight:500;
+  }
+
+  /* menu pct row */
+  .menu-pct-row {
+    display:grid; grid-template-columns:1fr 1fr; gap:8px;
+  }
+  .menu-pct-field label {
+    display:flex; align-items:center; gap:5px;
+    font-size:10px; color:var(--muted); margin-bottom:4px;
+  }
+  .menu-color-dot {
+    width:8px; height:8px; border-radius:2px; flex-shrink:0;
+  }
+
+  /* hint */
+  .pct-hint {
+    font-size:10px; padding:6px 10px; border-radius:8px;
+    margin-bottom:8px;
+  }
+  .pct-hint.ok   { background:rgba(78,138,104,.1); color:var(--sage); }
+  .pct-hint.ng   { background:rgba(160,72,72,.1);  color:var(--rose); }
+
+  /* buttons */
+  .btn-primary {
+    width:100%; padding:14px;
+    background:var(--gold); color:#fff;
+    font-size:14px; font-weight:500; font-family:inherit;
+    border:none; border-radius:12px; cursor:pointer;
+    letter-spacing:.04em; transition:background .15s, transform .1s;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .btn-primary:active { background:#7a6040; transform:scale(.98); }
+  .btn-secondary {
+    width:100%; padding:12px;
+    background:transparent; color:var(--muted);
+    font-size:13px; font-family:inherit;
+    border:1px solid var(--border); border-radius:12px; cursor:pointer;
+    transition:background .15s;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .btn-secondary:active { background:var(--border); }
+
+  /* month selector */
+  .month-tabs {
+    display:flex; gap:8px; padding:12px;
+    background:var(--bg2); position:sticky; top:88px; z-index:9;
+  }
+  .month-tab {
+    flex:1; padding:8px 0; text-align:center;
+    font-size:12px; font-weight:500; color:rgba(255,255,255,.6);
+    border:1px solid transparent; border-radius:10px;
+    cursor:pointer; -webkit-tap-highlight-color:transparent;
+    transition:all .2s;
+  }
+  .month-tab.active {
+    background:rgba(255,255,255,.12);
+    border-color:var(--gold-l); color:var(--gold-l); font-weight:600;
+  }
+
+  /* toast */
+  .toast {
+    position:fixed; bottom:30px; left:50%; transform:translateX(-50%);
+    background:#2a2825; color:#fff; font-size:13px;
+    padding:10px 20px; border-radius:20px;
+    opacity:0; transition:opacity .3s; pointer-events:none; z-index:99;
+    white-space:nowrap;
+  }
+  .toast.show { opacity:1; }
+
+  .section-spacer { height:24px; }
+  .save-bar {
+    padding:16px 12px 32px; position:sticky; bottom:0;
+    background:linear-gradient(transparent, var(--bg) 30%);
+  }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div>
+    <div class="header-title">T ring 天王町</div>
+    <div class="header-sub">Admin — データ入力</div>
+  </div>
+  <a href="index.html" class="back-link">← 閲覧画面</a>
+</div>
+
+
+
+<!-- Admin content (hidden until login) -->
+<div id="adminContent">
+
+  <!-- Month tabs -->
+  <div class="month-tabs" id="monthTabs"></div>
+
+  <!-- Form -->
+  <div id="formBody"></div>
+
+  <!-- Save bar -->
+  <div class="save-bar">
+    <button class="btn-primary" onclick="saveData()">💾 この月のデータを保存</button>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══ スタッフ定義（固定） ══
+const STAFF_DEF = [
+  {name:'山下 大貴', role:'Top Stylist', ini:'山下', bg:'rgba(212,184,150,.15)', tc:'#d4b896'},
+  {name:'新木 彩加',  role:'Top Stylist', ini:'新木', bg:'rgba(158,196,170,.15)', tc:'#9ec4aa'},
+  {name:'富岡 輝',   role:'Top Stylist', ini:'富岡', bg:'rgba(154,180,200,.15)', tc:'#9ab4c8'},
+  {name:'畑中 守',   role:'Manager',     ini:'畑中', bg:'rgba(180,168,200,.15)', tc:'#b4a8c8'},
+  {name:'右橋 陸',   role:'Manager',     ini:'右橋', bg:'rgba(212,160,160,.15)', tc:'#d4a0a0'},
+  {name:'藤田 龍法', role:'Owner',       ini:'藤田', bg:'rgba(200,190,180,.15)', tc:'#b0a090'},
+];
+
+const MENU_KEYS   = ['cut','color','perm','tr','spa'];
+const MENU_LABELS = {cut:'カット',color:'カラー',perm:'縮毛矯正',tr:'トリートメント',spa:'ヘッドスパ'};
+const MENU_COLORS = {cut:'#4a6e8a',color:'#9a7e5a',perm:'#a04848',tr:'#4e8a68',spa:'#6a607a'};
+
+// ══ 月定義 ══
+const MONTHS = [
+  {key:'2025-01',label:'1月'},
+  {key:'2025-02',label:'2月'},
+  {key:'2025-03',label:'3月'},
+];
+
+let currentMonth = '2025-03';
+
+// ══ 月タブ ══
+function buildMonthTabs() {
+  const el = document.getElementById('monthTabs');
+  el.innerHTML = MONTHS.map(m => `
+    <div class="month-tab ${m.key===currentMonth?'active':''}"
+         onclick="switchMonth('${m.key}')">${m.label}</div>
+  `).join('');
+}
+
+function switchMonth(key) {
+  currentMonth = key;
+  buildMonthTabs();
+  buildForm();
+}
+
+// ══ データ取得 ══
+function getData(key) {
+  const raw = localStorage.getItem('tring_' + key);
+  return raw ? JSON.parse(raw) : null;
+}
+
+function getDefaultData(key) {
+  // デフォルト値（空欄スタート）
+  return {
+    sales:0, salesTarget:0,
+    clients:0, repeaters:0, newClients:0,
+    maxPrice:0, minPrice:0,
+    newIg:0, newRef:0, newOther:0,
+    menu:{cut:20,color:30,perm:20,tr:20,spa:10},
+    menuCounts:{cut:0,color:0,perm:0,tr:0,spa:0},
+    menuSales:{cut:0,color:0,perm:0,tr:0,spa:0},
+    staff: STAFF_DEF.map(s=>({
+      ...s, sales:0, clients:0,
+      menu:{cut:20,color:20,perm:20,tr:20,spa:20}
+    }))
+  };
+}
+
+// ══ フォーム構築 ══
+function buildForm() {
+  const d = getData(currentMonth) || getDefaultData(currentMonth);
+  const monthLabel = MONTHS.find(m=>m.key===currentMonth).label;
+  const body = document.getElementById('formBody');
+
+  body.innerHTML = `
+    <!-- 全体KPI -->
+    <div class="form-section">
+      <div class="form-section-title"><div class="dot"></div>全体 — ${monthLabel}</div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>総売上（円）</label>
+          <input type="number" id="f_sales" value="${d.sales}" inputmode="numeric">
+        </div>
+        <div class="field">
+          <label>目標売上（円）</label>
+          <input type="number" id="f_target" value="${d.salesTarget}" inputmode="numeric">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>来客数（名）</label>
+          <input type="number" id="f_clients" value="${d.clients}" inputmode="numeric">
+        </div>
+        <div class="field">
+          <label>うちリピーター</label>
+          <input type="number" id="f_repeaters" value="${d.repeaters}" inputmode="numeric">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>新規顧客（名）</label>
+          <input type="number" id="f_newClients" value="${d.newClients}" inputmode="numeric">
+        </div>
+        <div class="field"></div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>新規 Instagram経由</label>
+          <input type="number" id="f_newIg" value="${d.newIg}" inputmode="numeric">
+        </div>
+        <div class="field">
+          <label>新規 紹介</label>
+          <input type="number" id="f_newRef" value="${d.newRef}" inputmode="numeric">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>新規 その他</label>
+          <input type="number" id="f_newOther" value="${d.newOther}" inputmode="numeric">
+        </div>
+        <div class="field"></div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>最高単価（円）</label>
+          <input type="number" id="f_maxPrice" value="${d.maxPrice}" inputmode="numeric">
+        </div>
+        <div class="field">
+          <label>最低単価（円）</label>
+          <input type="number" id="f_minPrice" value="${d.minPrice}" inputmode="numeric">
+        </div>
+      </div>
+    </div>
+
+    <!-- メニュー構成比 -->
+    <div class="form-section">
+      <div class="form-section-title"><div class="dot" style="background:#4a6e8a"></div>メニュー構成比（合計100%）</div>
+      <div id="menuPctHint" class="pct-hint ok">合計：100%</div>
+      <div class="menu-pct-row">
+        ${MENU_KEYS.map(k=>`
+          <div class="menu-pct-field field">
+            <label>
+              <span class="menu-color-dot" style="background:${MENU_COLORS[k]}"></span>
+              ${MENU_LABELS[k]}（%）
+            </label>
+            <input type="number" id="f_menu_${k}" value="${d.menu[k]}"
+              min="0" max="100" inputmode="numeric" onchange="checkMenuPct()">
+          </div>
+        `).join('')}
+      </div>
+
+      <div style="height:16px"></div>
+      <div class="form-section-title" style="font-size:12px;border-bottom:1px solid var(--border);padding-bottom:8px;">メニュー別 件数・売上</div>
+      ${MENU_KEYS.map(k=>`
+        <div class="field-row" style="margin-top:10px;">
+          <div class="field">
+            <label><span class="menu-color-dot" style="background:${MENU_COLORS[k]};display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:4px;"></span>${MENU_LABELS[k]} 件数</label>
+            <input type="number" id="f_cnt_${k}" value="${d.menuCounts[k]}" inputmode="numeric">
+          </div>
+          <div class="field">
+            <label>${MENU_LABELS[k]} 売上（円）</label>
+            <input type="number" id="f_sale_${k}" value="${d.menuSales[k]}" inputmode="numeric">
+          </div>
+        </div>
+      `).join('')}
+    </div>
+
+    <!-- スタッフ別 -->
+    <div class="form-section">
+      <div class="form-section-title"><div class="dot" style="background:#4e8a68"></div>スタッフ別</div>
+      <div class="staff-grid">
+        ${STAFF_DEF.map((s,i) => {
+          const sd = d.staff[i] || {...s,sales:0,clients:0,menu:{cut:20,color:20,perm:20,tr:20,spa:20}};
+          return `
+          <div class="staff-block">
+            <div class="staff-block-header">
+              <div class="staff-avatar" style="background:${s.bg};color:${s.tc}">${s.ini}</div>
+              ${s.name} <span style="font-weight:400;color:var(--muted);font-size:11px;">${s.role}</span>
+            </div>
+            <div class="staff-block-body">
+              <div class="field-row">
+                <div class="field">
+                  <label>売上（円）</label>
+                  <input type="number" id="s${i}_sales" value="${sd.sales}" inputmode="numeric">
+                </div>
+                <div class="field">
+                  <label>担当人数</label>
+                  <input type="number" id="s${i}_clients" value="${sd.clients}" inputmode="numeric">
+                </div>
+              </div>
+              <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">メニュー構成比（%・合計100）</div>
+              <div id="s${i}_hint" class="pct-hint ok" style="font-size:10px;">合計：100%</div>
+              <div class="menu-pct-row">
+                ${MENU_KEYS.map(k=>`
+                  <div class="menu-pct-field field">
+                    <label>
+                      <span class="menu-color-dot" style="background:${MENU_COLORS[k]}"></span>
+                      ${MENU_LABELS[k]}
+                    </label>
+                    <input type="number" id="s${i}_${k}" value="${sd.menu[k]}"
+                      min="0" max="100" inputmode="numeric"
+                      onchange="checkStaffPct(${i})">
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+
+    <div class="section-spacer"></div>
+  `;
+
+  checkMenuPct();
+  STAFF_DEF.forEach((_,i) => checkStaffPct(i));
+}
+
+// ══ 合計チェック ══
+function checkMenuPct() {
+  const total = MENU_KEYS.reduce((s,k)=>s+(parseInt(document.getElementById('f_menu_'+k)?.value)||0),0);
+  const hint = document.getElementById('menuPctHint');
+  if (!hint) return;
+  hint.textContent = '合計：' + total + '%';
+  hint.className = 'pct-hint ' + (total===100?'ok':'ng');
+}
+
+function checkStaffPct(i) {
+  const total = MENU_KEYS.reduce((s,k)=>s+(parseInt(document.getElementById(`s${i}_${k}`)?.value)||0),0);
+  const hint = document.getElementById(`s${i}_hint`);
+  if (!hint) return;
+  hint.textContent = '合計：' + total + '%';
+  hint.className = 'pct-hint ' + (total===100?'ok':'ng') + ' ' + 'pct-hint';
+  hint.style.fontSize = '10px';
+}
+
+// ══ 保存 ══
+function saveData() {
+  const v = id => parseInt(document.getElementById(id)?.value)||0;
+
+  const data = {
+    sales:      v('f_sales'),
+    salesTarget:v('f_target'),
+    clients:    v('f_clients'),
+    repeaters:  v('f_repeaters'),
+    newClients: v('f_newClients'),
+    maxPrice:   v('f_maxPrice'),
+    minPrice:   v('f_minPrice'),
+    newIg:      v('f_newIg'),
+    newRef:     v('f_newRef'),
+    newOther:   v('f_newOther'),
+    menu:       Object.fromEntries(MENU_KEYS.map(k=>[k,v('f_menu_'+k)])),
+    menuCounts: Object.fromEntries(MENU_KEYS.map(k=>[k,v('f_cnt_'+k)])),
+    menuSales:  Object.fromEntries(MENU_KEYS.map(k=>[k,v('f_sale_'+k)])),
+    staff: STAFF_DEF.map((s,i)=>({
+      ...s,
+      sales:   v(`s${i}_sales`),
+      clients: v(`s${i}_clients`),
+      menu:    Object.fromEntries(MENU_KEYS.map(k=>[k,v(`s${i}_${k}`)]))
+    }))
+  };
+
+  localStorage.setItem('tring_' + currentMonth, JSON.stringify(data));
+  showToast('✓ 保存しました！');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2500);
+}
+
+// ══ 初期化 ══
+buildMonthTabs();
+buildForm();
+</script>
+</body>
+</html>

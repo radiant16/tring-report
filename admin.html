@@ -3,270 +3,161 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>T ring 天王町 — 管理画面</title>
+<title>T ring — 管理画面</title>
 <style>
-:root {
-  --bg:     #8a8680;
-  --bg2:    #6e6a65;
-  --card:   #ffffff;
-  --border: #dddad5;
-  --ink:    #2a2825;
-  --muted:  #888078;
-  --gold:   #9a7e5a;
-  --gold-l: #b89a70;
-  --sage:   #4e8a68;
-  --rose:   #a04848;
-  --radius: 12px;
-}
-* { box-sizing:border-box; margin:0; padding:0; }
-body {
-  font-family:'Meiryo','メイリオ','Hiragino Kaku Gothic ProN',sans-serif;
-  background:var(--bg); color:var(--ink);
-  min-height:100vh; padding-bottom:40px;
-  -webkit-font-smoothing:antialiased;
-}
+:root{--bg:#8a8680;--bg2:#6e6a65;--card:#fff;--border:#dddad5;--ink:#2a2825;--muted:#888078;--gold:#9a7e5a;--gold-l:#b89a70;--sage:#4e8a68;--rose:#a04848;--r:12px;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Meiryo','メイリオ','Hiragino Kaku Gothic ProN',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;padding-bottom:60px;-webkit-font-smoothing:antialiased;}
 
-/* ── Header ── */
-.header {
-  background:var(--bg2); padding:48px 16px 14px;
-  border-bottom:1px solid rgba(0,0,0,.15);
-  position:sticky; top:0; z-index:20;
-  display:flex; justify-content:space-between; align-items:flex-end;
-}
-.header-left {}
-.header-logo {
-  font-size:16px; font-weight:500; color:#fff; letter-spacing:.04em;
-}
-.header-sub { font-size:9px; color:rgba(255,255,255,.5); letter-spacing:.14em; text-transform:uppercase; margin-top:2px; }
-.back-btn {
-  font-size:11px; color:rgba(255,255,255,.7);
-  text-decoration:none; border:1px solid rgba(255,255,255,.3);
-  padding:6px 14px; border-radius:20px; white-space:nowrap;
-}
+.header{background:var(--bg2);padding:48px 16px 14px;border-bottom:1px solid rgba(0,0,0,.15);position:sticky;top:0;z-index:30;display:flex;justify-content:space-between;align-items:flex-end;}
+.header-logo{font-size:16px;font-weight:500;color:#fff;letter-spacing:.04em;}
+.header-sub{font-size:9px;color:rgba(255,255,255,.5);letter-spacing:.14em;text-transform:uppercase;margin-top:2px;}
+.back-btn{font-size:11px;color:rgba(255,255,255,.7);text-decoration:none;border:1px solid rgba(255,255,255,.3);padding:6px 14px;border-radius:20px;white-space:nowrap;}
 
-/* ── Date bar ── */
-.date-bar {
-  background:var(--bg2); padding:10px 16px;
-  display:flex; align-items:center; gap:10px;
-  border-bottom:1px solid rgba(0,0,0,.1);
-  position:sticky; top:80px; z-index:19;
-}
-.date-label { font-size:11px; color:rgba(255,255,255,.6); }
-.date-select {
-  background:rgba(255,255,255,.12); color:#fff;
-  border:1px solid rgba(255,255,255,.25); border-radius:8px;
-  padding:5px 10px; font-size:13px; font-weight:500;
-  -webkit-appearance:none; appearance:none;
-  cursor:pointer;
-}
-.date-today-btn {
-  margin-left:auto;
-  font-size:11px; color:var(--gold-l);
-  background:transparent; border:1px solid rgba(184,154,112,.4);
-  padding:5px 12px; border-radius:16px; cursor:pointer;
-  -webkit-tap-highlight-color:transparent;
-}
+/* Tab nav */
+.tab-nav{display:flex;background:var(--bg2);border-bottom:1px solid rgba(0,0,0,.1);padding:0 16px;}
+.tab-btn{flex:1;padding:11px 0;font-size:12px;font-weight:500;color:rgba(255,255,255,.5);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;letter-spacing:.06em;transition:all .2s;-webkit-tap-highlight-color:transparent;}
+.tab-btn.active{color:var(--gold-l);border-bottom-color:var(--gold-l);}
 
-/* ── Month tab ── */
-.month-tabs {
-  display:flex; gap:6px; padding:12px 16px;
-  background:var(--bg2); border-bottom:1px solid rgba(0,0,0,.1);
-}
-.month-tab {
-  flex:1; padding:7px 0; text-align:center;
-  font-size:12px; font-weight:500; color:rgba(255,255,255,.5);
-  border:1px solid transparent; border-radius:10px;
-  cursor:pointer; -webkit-tap-highlight-color:transparent; transition:all .2s;
-}
-.month-tab.active {
-  background:rgba(255,255,255,.12); border-color:var(--gold-l); color:var(--gold-l);
-}
+/* Month + Date bar */
+.ctrl-bar{background:var(--bg2);padding:10px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(0,0,0,.1);position:sticky;top:100px;z-index:20;}
+.ctrl-select{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:8px;padding:5px 10px;font-size:13px;font-weight:500;-webkit-appearance:none;cursor:pointer;}
+.today-btn{margin-left:auto;font-size:11px;color:var(--gold-l);background:transparent;border:1px solid rgba(184,154,112,.4);padding:5px 12px;border-radius:16px;cursor:pointer;-webkit-tap-highlight-color:transparent;}
 
-/* ── Cards ── */
-.section { padding:14px 14px 4px; }
-.section-title {
-  font-size:10px; letter-spacing:.14em; text-transform:uppercase;
-  color:rgba(255,255,255,.6); margin-bottom:10px;
-  display:flex; align-items:center; gap:8px;
-}
-.section-title::after { content:''; flex:1; height:1px; background:rgba(255,255,255,.1); }
+/* Cards */
+.sec{padding:12px 14px 4px;}
+.sec-label{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+.sec-label::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.1);}
 
-/* ── Staff card ── */
-.staff-card {
-  background:var(--card); border-radius:var(--radius);
-  margin-bottom:10px; overflow:hidden;
-  box-shadow:0 2px 12px rgba(0,0,0,.08);
-}
-.staff-head {
-  display:flex; align-items:center; gap:12px;
-  padding:14px 16px 12px;
-  border-bottom:1px solid var(--border);
-  cursor:pointer; -webkit-tap-highlight-color:transparent;
-}
-.staff-avatar {
-  width:38px; height:38px; border-radius:10px;
-  display:flex; align-items:center; justify-content:center;
-  font-size:12px; font-weight:500; flex-shrink:0;
-  border:1px solid var(--border);
-}
-.staff-info { flex:1; min-width:0; }
-.staff-name { font-size:14px; font-weight:500; }
-.staff-role { font-size:10px; color:var(--muted); margin-top:1px; }
-.staff-total {
-  text-align:right; flex-shrink:0;
-}
-.staff-total-sales { font-size:14px; font-weight:600; color:var(--gold); }
-.staff-total-pct {
-  font-size:10px; color:var(--muted); margin-top:2px;
-}
-.staff-toggle { font-size:13px; color:var(--muted); transition:transform .2s; flex-shrink:0; }
-.staff-card.open .staff-toggle { transform:rotate(180deg); }
+.card{background:var(--card);border-radius:var(--r);margin-bottom:10px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.08);}
+.card-head{display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid var(--border);cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;}
+.avatar{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;flex-shrink:0;border:1px solid var(--border);}
+.staff-info{flex:1;min-width:0;}
+.staff-name{font-size:14px;font-weight:500;}
+.staff-role{font-size:10px;color:var(--muted);margin-top:1px;}
+.staff-right{text-align:right;flex-shrink:0;}
+.staff-sales{font-size:14px;font-weight:600;color:var(--gold);}
+.staff-cnt{font-size:10px;color:var(--muted);margin-top:2px;}
+.chevron{font-size:13px;color:var(--muted);transition:transform .2s;flex-shrink:0;}
+.card.open .chevron{transform:rotate(180deg);}
 
-.staff-body { display:none; padding:14px 16px; }
-.staff-card.open .staff-body { display:block; }
+.card-body{display:none;padding:14px 16px;}
+.card.open .card-body{display:block;}
 
-/* ── Menu input table ── */
-.menu-table { width:100%; border-collapse:collapse; }
-.menu-table th {
-  font-size:10px; color:var(--muted); font-weight:400;
-  padding:0 4px 8px; text-align:right; letter-spacing:.06em;
-}
-.menu-table th:first-child { text-align:left; }
-.menu-table td { padding:5px 4px; vertical-align:middle; }
-.menu-table td:first-child {
-  font-size:12px; color:var(--ink2,#3a3630);
-  display:flex; align-items:center; gap:6px; padding:5px 4px;
-  white-space:nowrap;
-}
-.menu-dot { width:8px; height:8px; border-radius:2px; flex-shrink:0; }
+/* Menu rows */
+.menu-rows{}
+.menu-row{display:grid;grid-template-columns:1fr 80px 1fr auto;align-items:center;gap:8px;margin-bottom:10px;}
+.menu-row:last-child{margin-bottom:0;}
+.menu-name{font-size:12px;display:flex;align-items:center;gap:6px;}
+.mdot{width:8px;height:8px;border-radius:2px;flex-shrink:0;}
+.unit-price{font-size:10px;color:var(--muted);text-align:right;white-space:nowrap;}
+.num-input{width:100%;padding:9px 10px;border:1px solid var(--border);border-radius:8px;font-size:15px;font-family:inherit;color:var(--ink);background:#faf9f7;text-align:right;-webkit-appearance:none;transition:border-color .2s;}
+.num-input:focus{outline:none;border-color:var(--gold);background:#fff;}
+.row-pct{font-size:12px;font-weight:600;min-width:38px;text-align:right;}
 
-/* ── Number input ── */
-.num-input {
-  width:100%; padding:8px 10px;
-  border:1px solid var(--border); border-radius:8px;
-  font-size:14px; font-family:inherit; color:var(--ink);
-  background:#faf9f7; text-align:right;
-  -webkit-appearance:none; appearance:none;
-  transition:border-color .2s;
-}
-.num-input:focus { outline:none; border-color:var(--gold); background:#fff; }
+.bar-row{grid-column:1/-1;height:3px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:-6px;margin-bottom:4px;}
+.bar-fill{height:100%;border-radius:2px;transition:width .35s;}
 
-/* ── Auto ratio badge ── */
-.ratio-cell {
-  text-align:right; font-size:13px; font-weight:600; min-width:44px;
-}
-.ratio-bar-wrap { padding:2px 4px 6px; }
-.ratio-bar-track { height:3px; background:var(--border); border-radius:2px; overflow:hidden; }
-.ratio-bar-fill { height:100%; border-radius:2px; transition:width .4s ease; }
+.card-footer{display:flex;justify-content:space-between;align-items:center;padding-top:10px;border-top:1px solid var(--border);margin-top:8px;}
+.footer-sum{font-size:11px;color:var(--muted);}
+.footer-sum span{font-weight:600;color:var(--ink);}
+.save-btn{padding:8px 20px;background:var(--gold);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .15s;}
+.save-btn:active{background:#7a6040;}
 
-/* ── Staff summary row ── */
-.staff-summary {
-  display:flex; gap:12px; padding:10px 0 0;
-  border-top:1px solid var(--border); margin-top:8px;
-  flex-wrap:wrap;
-}
-.sum-chip {
-  font-size:11px; color:var(--muted);
-}
-.sum-chip span { font-weight:600; color:var(--ink); }
+/* Summary card */
+.sum-card{background:var(--card);border-radius:var(--r);padding:16px;margin-bottom:10px;box-shadow:0 2px 12px rgba(0,0,0,.08);}
+.sum-card-title{font-size:11px;color:var(--muted);margin-bottom:12px;letter-spacing:.06em;}
+.sum-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.sg-label{font-size:10px;color:var(--muted);}
+.sg-val{font-size:20px;font-weight:600;color:var(--ink);margin-top:2px;}
+.sg-sub{font-size:10px;color:var(--muted);margin-top:1px;}
 
-/* ── Overall summary card ── */
-.summary-card {
-  background:var(--card); border-radius:var(--radius);
-  padding:16px; margin-bottom:10px;
-  box-shadow:0 2px 12px rgba(0,0,0,.08);
-}
-.summary-title { font-size:11px; color:var(--muted); margin-bottom:12px; letter-spacing:.06em; }
-.summary-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-.sum-item {}
-.sum-label { font-size:10px; color:var(--muted); margin-bottom:2px; }
-.sum-value { font-size:18px; font-weight:600; color:var(--ink); }
-.sum-sub { font-size:10px; color:var(--muted); margin-top:1px; }
+.mbar-row{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+.mbar-name{font-size:11px;color:var(--muted);width:70px;flex-shrink:0;display:flex;align-items:center;gap:4px;}
+.mbar-track{flex:1;height:5px;background:var(--border);border-radius:3px;overflow:hidden;}
+.mbar-fill{height:100%;border-radius:3px;transition:width .4s;}
+.mbar-pct{font-size:11px;font-weight:600;min-width:36px;text-align:right;}
+.mbar-cnt{font-size:10px;color:var(--muted);min-width:32px;text-align:right;}
 
-/* ── Menu overall table ── */
-.menu-summary-row {
-  display:flex; align-items:center; gap:8px;
-  margin-bottom:8px;
-}
-.menu-summary-row:last-child { margin-bottom:0; }
-.msrow-name { font-size:11px; color:var(--muted); width:72px; flex-shrink:0; display:flex; align-items:center; gap:5px; }
-.msrow-bar { flex:1; height:6px; background:var(--border); border-radius:3px; overflow:hidden; }
-.msrow-fill { height:100%; border-radius:3px; transition:width .4s; }
-.msrow-val { font-size:11px; font-weight:600; min-width:38px; text-align:right; }
-.msrow-cnt { font-size:10px; color:var(--muted); min-width:34px; text-align:right; }
+/* Progress */
+.prog-card{background:var(--card);border-radius:var(--r);padding:14px 16px;margin-bottom:10px;box-shadow:0 2px 12px rgba(0,0,0,.08);}
+.prog-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;}
+.prog-label{font-size:11px;color:var(--muted);}
+.prog-val{font-size:13px;font-weight:600;color:var(--gold);}
+.prog-track{height:5px;background:var(--border);border-radius:3px;overflow:hidden;}
+.prog-fill{height:100%;background:var(--gold);border-radius:3px;transition:width .5s;}
+.prog-days{display:flex;justify-content:space-between;margin-top:5px;font-size:10px;color:var(--muted);}
 
-/* ── Save button ── */
-.save-area {
-  padding:14px 14px 0;
-}
-.save-btn {
-  width:100%; padding:14px;
-  background:var(--gold); color:#fff;
-  font-size:14px; font-weight:500; font-family:inherit;
-  border:none; border-radius:12px; cursor:pointer;
-  letter-spacing:.04em; transition:background .15s, transform .1s;
-  -webkit-tap-highlight-color:transparent;
-}
-.save-btn:active { background:#7a6040; transform:scale(.98); }
+/* Menu master tab */
+.master-card{background:var(--card);border-radius:var(--r);padding:16px;margin-bottom:10px;box-shadow:0 2px 12px rgba(0,0,0,.08);}
+.master-title{font-size:13px;font-weight:500;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+.master-row{display:grid;grid-template-columns:1fr auto 1fr auto;align-items:center;gap:8px;margin-bottom:10px;}
+.master-row:last-child{margin-bottom:0;}
+.master-label{font-size:12px;display:flex;align-items:center;gap:6px;}
+.master-price-wrap{display:flex;align-items:center;gap:4px;}
+.yen-label{font-size:12px;color:var(--muted);}
+.master-input{width:90px;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;color:var(--ink);background:#faf9f7;text-align:right;-webkit-appearance:none;transition:border-color .2s;}
+.master-input:focus{outline:none;border-color:var(--gold);background:#fff;}
+.master-save-btn{width:100%;padding:13px;background:var(--gold);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:500;cursor:pointer;margin-top:14px;letter-spacing:.04em;-webkit-tap-highlight-color:transparent;}
+.master-save-btn:active{background:#7a6040;}
+.menu-note{font-size:11px;color:var(--muted);line-height:1.7;padding:10px 0 0;}
 
-.saved-badge {
-  display:inline-flex; align-items:center; gap:6px;
-  font-size:11px; color:var(--sage); margin-left:10px;
-  opacity:0; transition:opacity .3s;
-}
-.saved-badge.show { opacity:1; }
-
-/* ── Toast ── */
-.toast {
-  position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
-  background:#2a2825; color:#fff; font-size:13px;
-  padding:10px 22px; border-radius:20px;
-  opacity:0; transition:opacity .3s; pointer-events:none; z-index:99; white-space:nowrap;
-}
-.toast.show { opacity:1; }
-
-/* ── Progress bar top ── */
-.month-progress {
-  background:var(--card); border-radius:var(--radius);
-  padding:14px 16px; margin-bottom:10px;
-  box-shadow:0 2px 12px rgba(0,0,0,.08);
-}
-.mp-header { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px; }
-.mp-label { font-size:11px; color:var(--muted); }
-.mp-value { font-size:13px; font-weight:600; color:var(--gold); }
-.mp-track { height:6px; background:var(--border); border-radius:3px; overflow:hidden; }
-.mp-fill { height:100%; background:var(--gold); border-radius:3px; transition:width .5s; }
-.mp-days { display:flex; justify-content:space-between; margin-top:6px; font-size:10px; color:var(--muted); }
+/* Toast */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#2a2825;color:#fff;font-size:13px;padding:10px 22px;border-radius:20px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:99;white-space:nowrap;}
+.toast.show{opacity:1;}
 </style>
 </head>
 <body>
 
 <div class="header">
-  <div class="header-left">
+  <div>
     <div class="header-logo">T ring 天王町</div>
-    <div class="header-sub">Daily Input</div>
+    <div class="header-sub">管理画面</div>
   </div>
   <a href="index.html" class="back-btn">← 閲覧画面</a>
 </div>
 
-<!-- Month tabs -->
-<div class="month-tabs" id="monthTabs"></div>
-
-<!-- Date bar -->
-<div class="date-bar">
-  <div class="date-label">日付</div>
-  <select class="date-select" id="dateSelect" onchange="onDateChange()"></select>
-  <button class="date-today-btn" onclick="goToday()">今日</button>
+<div class="tab-nav">
+  <button class="tab-btn active" id="tab-input" onclick="switchTab('input')">日次入力</button>
+  <button class="tab-btn" id="tab-master" onclick="switchTab('master')">メニュー設定</button>
 </div>
 
-<!-- Content -->
-<div id="mainContent"></div>
+<!-- 入力タブ -->
+<div id="pane-input">
+  <div class="ctrl-bar">
+    <select class="ctrl-select" id="monthSel" onchange="onMonthChange()"></select>
+    <select class="ctrl-select" id="daySel" onchange="onDayChange()"></select>
+    <button class="today-btn" onclick="goToday()">今日</button>
+  </div>
+  <div id="inputContent"></div>
+</div>
+
+<!-- マスタタブ -->
+<div id="pane-master" style="display:none;">
+  <div class="sec" style="padding-top:16px;">
+    <div class="master-card">
+      <div class="master-title">メニューマスタ — 平均単価設定</div>
+      <div id="masterRows"></div>
+      <p class="menu-note">※ 平均単価を設定してください。<br>管理画面の件数入力時に自動で売上計算されます。</p>
+      <button class="master-save-btn" onclick="saveMaster()">保存する</button>
+    </div>
+  </div>
+</div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-// ══ 定数 ══
-const STAFF_DEF = [
+// ══ デフォルトメニューマスタ ══
+const DEFAULT_MENUS = [
+  {key:'cut',   label:'カット',      color:'#4a6e8a', price:5000},
+  {key:'color', label:'カラー',      color:'#9a7e5a', price:9000},
+  {key:'perm',  label:'パーマ',      color:'#7a70a0', price:12000},
+  {key:'tr',    label:'トリートメント', color:'#4e8a68', price:6000},
+  {key:'perm2', label:'縮毛矯正',    color:'#a04848', price:18000},
+  {key:'spa',   label:'ヘッドスパ',  color:'#6a607a', price:4000},
+];
+
+const STAFF = [
   {id:'yamashita', name:'山下 大貴', role:'Top Stylist', ini:'山下', bg:'rgba(184,154,112,.15)', tc:'#b89a70'},
   {id:'araki',     name:'新木 彩加',  role:'Top Stylist', ini:'新木', bg:'rgba(122,170,138,.15)', tc:'#7aaa8a'},
   {id:'tomioka',   name:'富岡 輝',   role:'Top Stylist', ini:'富岡', bg:'rgba(122,174,201,.15)', tc:'#7aaec9'},
@@ -275,337 +166,316 @@ const STAFF_DEF = [
   {id:'fujita',    name:'藤田 龍法', role:'Owner',       ini:'藤田', bg:'rgba(200,184,160,.15)', tc:'#b09a70'},
 ];
 
-const MENUS = [
-  {key:'cut',   label:'カット',      color:'#4a6e8a'},
-  {key:'color', label:'カラー',      color:'#9a7e5a'},
-  {key:'perm',  label:'縮毛矯正',    color:'#a04848'},
-  {key:'tr',    label:'トリートメント', color:'#4e8a68'},
-  {key:'spa',   label:'ヘッドスパ',  color:'#6a607a'},
-];
-
 const MONTHS = [
-  {key:'2025-01', label:'1月', days:31},
-  {key:'2025-02', label:'2月', days:28},
-  {key:'2025-03', label:'3月', days:31},
+  {key:'2025-01',label:'2025年1月',days:31},
+  {key:'2025-02',label:'2025年2月',days:28},
+  {key:'2025-03',label:'2025年3月',days:31},
+  {key:'2025-04',label:'2025年4月',days:30},
+  {key:'2025-05',label:'2025年5月',days:31},
 ];
 
 // ══ 状態 ══
-let currentMonth = '2025-03';
-let currentDay   = today();
-
-function today() {
+let currentMonth = (() => {
   const d = new Date();
-  return d.getDate();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+})();
+// 存在しない月はデフォルトに
+if (!MONTHS.find(m => m.key === currentMonth)) currentMonth = '2025-04';
+let currentDay = new Date().getDate();
+let currentTab = 'input';
+
+// ══ メニューマスタ取得 ══
+function getMenus() {
+  const raw = localStorage.getItem('tring_menus');
+  return raw ? JSON.parse(raw) : DEFAULT_MENUS;
+}
+function saveMenusToStorage(menus) {
+  localStorage.setItem('tring_menus', JSON.stringify(menus));
+  // 閲覧画面用にも保存
+  localStorage.setItem('tring_menus_updated', Date.now());
 }
 
-// ══ ストレージキー ══
-// 日次データ: tring_day_{month}_{day}_{staffId} → {cut:{cnt,sales}, color:{cnt,sales}, ...}
-function dayKey(month, day, staffId) {
-  return `tring_day_${month}_${String(day).padStart(2,'0')}_${staffId}`;
+// ══ 日次データ ══
+function dayKey(month, day, sid) {
+  return `tring_d_${month}_${String(day).padStart(2,'0')}_${sid}`;
 }
-
-function getStaffDay(month, day, staffId) {
-  const raw = localStorage.getItem(dayKey(month, day, staffId));
+function getStaffDay(month, day, sid) {
+  const raw = localStorage.getItem(dayKey(month, day, sid));
   if (raw) return JSON.parse(raw);
-  return Object.fromEntries(MENUS.map(m => [m.key, {cnt:0, sales:0}]));
+  const menus = getMenus();
+  return Object.fromEntries(menus.map(m => [m.key, 0]));
+}
+function setStaffDay(month, day, sid, data) {
+  localStorage.setItem(dayKey(month, day, sid), JSON.stringify(data));
+  // 閲覧画面に通知
+  localStorage.setItem('tring_data_updated', Date.now());
 }
 
-function setStaffDay(month, day, staffId, data) {
-  localStorage.setItem(dayKey(month, day, staffId), JSON.stringify(data));
-}
-
-// 月累積（day=1〜指定日まで合計）
-function getMonthCumulative(month, upToDay) {
-  const result = {};
-  STAFF_DEF.forEach(s => {
-    result[s.id] = Object.fromEntries(MENUS.map(m => [m.key, {cnt:0, sales:0}]));
-  });
+// 月累積
+function getCumulative(month, upToDay) {
+  const menus = getMenus();
+  const res = {};
+  STAFF.forEach(s => { res[s.id] = Object.fromEntries(menus.map(m => [m.key, 0])); });
   for (let d = 1; d <= upToDay; d++) {
-    STAFF_DEF.forEach(s => {
+    STAFF.forEach(s => {
       const day = getStaffDay(month, d, s.id);
-      MENUS.forEach(m => {
-        result[s.id][m.key].cnt   += day[m.key].cnt;
-        result[s.id][m.key].sales += day[m.key].sales;
-      });
+      menus.forEach(m => { res[s.id][m.key] += (day[m.key] || 0); });
     });
   }
-  return result;
-}
-
-// ══ 月タブ ══
-function buildMonthTabs() {
-  document.getElementById('monthTabs').innerHTML = MONTHS.map(m => `
-    <div class="month-tab ${m.key===currentMonth?'active':''}"
-         onclick="switchMonth('${m.key}')">${m.label}</div>
-  `).join('');
-}
-
-function switchMonth(key) {
-  currentMonth = key;
-  buildMonthTabs();
-  buildDateSelect();
-  buildContent();
-}
-
-// ══ 日付セレクト ══
-function buildDateSelect() {
-  const mo = MONTHS.find(m => m.key === currentMonth);
-  const sel = document.getElementById('dateSelect');
-  sel.innerHTML = Array.from({length: mo.days}, (_,i) => {
-    const d = i + 1;
-    return `<option value="${d}" ${d===currentDay?'selected':''}>${d}日</option>`;
-  }).join('');
-}
-
-function onDateChange() {
-  currentDay = parseInt(document.getElementById('dateSelect').value);
-  buildContent();
-}
-
-function goToday() {
-  currentDay = today();
-  buildDateSelect();
-  buildContent();
+  return res;
 }
 
 // ══ フォーマット ══
-function fmtYen(n) { return n ? n.toLocaleString('ja-JP') + '円' : '—'; }
-function fmtNum(n) { return n ? n.toLocaleString() : '0'; }
+function yen(n) { return n ? n.toLocaleString('ja-JP') + '円' : '—'; }
 
-// ══ メインコンテンツ ══
-function buildContent() {
-  const cumulative = getMonthCumulative(currentMonth, currentDay);
-  const todayData  = {};
-  STAFF_DEF.forEach(s => {
-    todayData[s.id] = getStaffDay(currentMonth, currentDay, s.id);
-  });
+// ══ タブ ══
+function switchTab(tab) {
+  currentTab = tab;
+  document.getElementById('pane-input').style.display  = tab==='input'  ? '' : 'none';
+  document.getElementById('pane-master').style.display = tab==='master' ? '' : 'none';
+  document.getElementById('tab-input').classList.toggle('active',  tab==='input');
+  document.getElementById('tab-master').classList.toggle('active', tab==='master');
+  if (tab === 'master') buildMaster();
+}
+
+// ══ コントロールバー ══
+function buildCtrls() {
+  const ms = document.getElementById('monthSel');
+  ms.innerHTML = MONTHS.map(m => `<option value="${m.key}" ${m.key===currentMonth?'selected':''}>${m.label}</option>`).join('');
+  buildDaySel();
+}
+function buildDaySel() {
+  const mo = MONTHS.find(m => m.key === currentMonth);
+  const ds = document.getElementById('daySel');
+  ds.innerHTML = Array.from({length: mo.days}, (_,i) => {
+    const d = i+1;
+    return `<option value="${d}" ${d===currentDay?'selected':''}>${d}日</option>`;
+  }).join('');
+}
+function onMonthChange() {
+  currentMonth = document.getElementById('monthSel').value;
+  currentDay = 1;
+  buildDaySel();
+  buildInputContent();
+}
+function onDayChange() {
+  currentDay = parseInt(document.getElementById('daySel').value);
+  buildInputContent();
+}
+function goToday() {
+  const d = new Date();
+  const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+  if (MONTHS.find(m => m.key === key)) { currentMonth = key; currentDay = d.getDate(); }
+  else { currentDay = d.getDate(); }
+  buildCtrls();
+  buildInputContent();
+}
+
+// ══ 入力コンテンツ ══
+function buildInputContent() {
+  const menus    = getMenus();
+  const cumul    = getCumulative(currentMonth, currentDay);
+  const todayMap = {};
+  STAFF.forEach(s => { todayMap[s.id] = getStaffDay(currentMonth, currentDay, s.id); });
 
   // 全体集計
   let totalSales = 0, totalCnt = 0;
-  const menuTotals = Object.fromEntries(MENUS.map(m => [m.key, {cnt:0, sales:0}]));
-  STAFF_DEF.forEach(s => {
-    MENUS.forEach(m => {
-      const v = cumulative[s.id][m.key];
-      totalSales += v.sales;
-      totalCnt   += v.cnt;
-      menuTotals[m.key].cnt   += v.cnt;
-      menuTotals[m.key].sales += v.sales;
+  const menuTotals = Object.fromEntries(menus.map(m => [m.key, {cnt:0,sales:0}]));
+  STAFF.forEach(s => {
+    menus.forEach(m => {
+      const cnt = cumul[s.id][m.key] || 0;
+      const sales = cnt * m.price;
+      menuTotals[m.key].cnt   += cnt;
+      menuTotals[m.key].sales += sales;
+      totalSales += sales;
+      totalCnt   += cnt;
     });
   });
 
   const mo = MONTHS.find(m => m.key === currentMonth);
-  const progressPct = Math.round(currentDay / mo.days * 100);
+  const prog = Math.round(currentDay / mo.days * 100);
 
-  let html = `
-  <div class="section">
-    <!-- 月次進捗 -->
-    <div class="month-progress">
-      <div class="mp-header">
-        <div class="mp-label">${mo.label} 月次進捗（〜${currentDay}日）</div>
-        <div class="mp-value">${fmtYen(totalSales)}</div>
-      </div>
-      <div class="mp-track"><div class="mp-fill" style="width:${progressPct}%"></div></div>
-      <div class="mp-days"><span>1日</span><span>${currentDay}日（${progressPct}%経過）</span><span>${mo.days}日</span></div>
+  let html = `<div class="sec">`;
+
+  // 進捗
+  html += `
+  <div class="prog-card">
+    <div class="prog-header">
+      <div class="prog-label">${mo.label} 累計（〜${currentDay}日）</div>
+      <div class="prog-val">${yen(totalSales)}</div>
     </div>
+    <div class="prog-track"><div class="prog-fill" style="width:${prog}%"></div></div>
+    <div class="prog-days"><span>1日</span><span>${currentDay}日（${prog}%経過）</span><span>${mo.days}日</span></div>
+  </div>`;
 
-    <!-- メニュー別合計 -->
-    <div class="summary-card">
-      <div class="summary-title">メニュー別累計（1日〜${currentDay}日）</div>
-      ${MENUS.map(m => {
-        const pct = totalSales ? Math.round(menuTotals[m.key].sales / totalSales * 100) : 0;
-        return `
-        <div class="menu-summary-row">
-          <div class="msrow-name"><span class="menu-dot" style="background:${m.color}"></span>${m.label}</div>
-          <div class="msrow-bar"><div class="msrow-fill" style="width:${pct}%;background:${m.color}"></div></div>
-          <div class="msrow-val" style="color:${m.color}">${pct}%</div>
-          <div class="msrow-cnt">${fmtNum(menuTotals[m.key].cnt)}件</div>
-        </div>`;
-      }).join('')}
-      <div style="padding-top:10px;border-top:1px solid var(--border);margin-top:8px;display:flex;justify-content:space-between;font-size:11px;color:var(--muted);">
-        <span>合計 ${fmtNum(totalCnt)}件</span>
-        <span style="font-weight:600;color:var(--ink)">${fmtYen(totalSales)}</span>
-      </div>
-    </div>
+  // メニュー別集計
+  html += `<div class="sum-card">
+    <div class="sum-card-title">メニュー別累計（件数・構成比）</div>`;
+  menus.forEach(m => {
+    const pct = totalSales ? Math.round(menuTotals[m.key].sales / totalSales * 100) : 0;
+    html += `
+    <div class="mbar-row">
+      <div class="mbar-name"><span class="mdot" style="background:${m.color}"></span>${m.label}</div>
+      <div class="mbar-track"><div class="mbar-fill" style="width:${pct}%;background:${m.color}"></div></div>
+      <div class="mbar-pct" style="color:${m.color}">${pct}%</div>
+      <div class="mbar-cnt">${menuTotals[m.key].cnt}件</div>
+    </div>`;
+  });
+  html += `<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);padding-top:10px;border-top:1px solid var(--border);margin-top:6px;">
+    <span>合計 ${totalCnt}件</span><span style="font-weight:600;color:var(--ink)">${yen(totalSales)}</span>
+  </div></div>`;
 
-    <div class="section-title">${currentDay}日 入力 — スタッフ別</div>
-  `;
+  // スタッフ入力カード
+  html += `<div class="sec-label">${currentDay}日 — スタッフ別入力</div>`;
 
-  // スタッフカード
-  STAFF_DEF.forEach(s => {
-    const d = todayData[s.id];
-    const staffDaySales = MENUS.reduce((a, m) => a + d[m.key].sales, 0);
-    const staffDayCnt   = MENUS.reduce((a, m) => a + d[m.key].cnt, 0);
-    const staffMonthSales = MENUS.reduce((a, m) => a + cumulative[s.id][m.key].sales, 0);
+  STAFF.forEach(s => {
+    const todayCnt = menus.reduce((a,m) => a + (todayMap[s.id][m.key]||0), 0);
+    const todaySales = menus.reduce((a,m) => a + (todayMap[s.id][m.key]||0)*m.price, 0);
+    const monthSales = menus.reduce((a,m) => a + (cumul[s.id][m.key]||0)*m.price, 0);
 
     html += `
-    <div class="staff-card" id="card_${s.id}">
-      <div class="staff-head" onclick="toggleCard('${s.id}')">
-        <div class="staff-avatar" style="background:${s.bg};color:${s.tc}">${s.ini}</div>
+    <div class="card" id="card_${s.id}">
+      <div class="card-head" onclick="toggleCard('${s.id}')">
+        <div class="avatar" style="background:${s.bg};color:${s.tc}">${s.ini}</div>
         <div class="staff-info">
           <div class="staff-name">${s.name}</div>
           <div class="staff-role">${s.role}</div>
         </div>
-        <div class="staff-total">
-          <div class="staff-total-sales">${staffDaySales ? fmtYen(staffDaySales) : '未入力'}</div>
-          <div class="staff-total-pct">月計 ${fmtYen(staffMonthSales)}</div>
+        <div class="staff-right">
+          <div class="staff-sales">${todaySales ? yen(todaySales) : '未入力'}</div>
+          <div class="staff-cnt">月計 ${yen(monthSales)}</div>
         </div>
-        <div class="staff-toggle">▾</div>
+        <div class="chevron">▾</div>
       </div>
-      <div class="staff-body" id="body_${s.id}">
-        <table class="menu-table">
-          <thead>
-            <tr>
-              <th style="width:36%">メニュー</th>
-              <th style="width:22%">件数</th>
-              <th style="width:26%">売上（円）</th>
-              <th style="width:16%">構成比</th>
-            </tr>
-          </thead>
-          <tbody id="tbody_${s.id}">
-          </tbody>
-        </table>
-        <div style="padding-top:8px;border-top:1px solid var(--border);margin-top:6px;display:flex;justify-content:space-between;align-items:center;">
-          <div class="staff-summary" id="sum_${s.id}"></div>
-          <button onclick="saveStaff('${s.id}')" style="padding:8px 18px;background:var(--gold);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;flex-shrink:0;">保存</button>
+      <div class="card-body" id="body_${s.id}">
+        <div class="menu-rows" id="rows_${s.id}"></div>
+        <div class="card-footer">
+          <div class="footer-sum" id="fsum_${s.id}"></div>
+          <button class="save-btn" onclick="saveStaff('${s.id}')">保存</button>
         </div>
       </div>
     </div>`;
   });
 
-  html += `</div>`; // .section
+  html += `</div>`;
+  document.getElementById('inputContent').innerHTML = html;
 
-  document.getElementById('mainContent').innerHTML = html;
-
-  // テーブル中身を描画
-  STAFF_DEF.forEach(s => {
-    renderStaffTable(s.id, todayData[s.id], cumulative[s.id]);
-  });
+  // 各スタッフのテーブルを描画
+  STAFF.forEach(s => renderStaffRows(s.id, todayMap[s.id]));
 }
 
-function renderStaffTable(staffId, dayData, monthData) {
-  const totalDaySales = MENUS.reduce((a,m) => a + (dayData[m.key].sales || 0), 0);
+function renderStaffRows(sid, dayData) {
+  const menus = getMenus();
+  const el = document.getElementById('rows_' + sid);
+  if (!el) return;
 
-  const tbody = document.getElementById('tbody_' + staffId);
-  if (!tbody) return;
+  const totalSales = menus.reduce((a,m) => a + (dayData[m.key]||0)*m.price, 0);
 
-  tbody.innerHTML = MENUS.map(m => {
-    const cnt   = dayData[m.key].cnt   || 0;
-    const sales = dayData[m.key].sales || 0;
-    const pct   = totalDaySales ? Math.round(sales / totalDaySales * 100) : 0;
+  el.innerHTML = menus.map(m => {
+    const cnt   = dayData[m.key] || 0;
+    const sales = cnt * m.price;
+    const pct   = totalSales ? Math.round(sales / totalSales * 100) : 0;
     return `
-    <tr>
-      <td>
-        <span class="menu-dot" style="background:${m.color}"></span>
-        <span style="font-size:12px">${m.label}</span>
-      </td>
-      <td>
-        <input class="num-input" type="number" min="0"
-          id="inp_${staffId}_${m.key}_cnt"
-          value="${cnt || ''}" placeholder="0"
-          inputmode="numeric"
-          onfocus="clearZero(this)"
-          onblur="restoreZero(this)"
-          oninput="onInput('${staffId}')">
-      </td>
-      <td>
-        <input class="num-input" type="number" min="0"
-          id="inp_${staffId}_${m.key}_sales"
-          value="${sales || ''}" placeholder="0"
-          inputmode="numeric"
-          onfocus="clearZero(this)"
-          onblur="restoreZero(this)"
-          oninput="onInput('${staffId}')">
-      </td>
-      <td class="ratio-cell" id="ratio_${staffId}_${m.key}" style="color:${m.color}">
-        ${pct ? pct + '%' : '—'}
-      </td>
-    </tr>
-    <tr>
-      <td colspan="4" class="ratio-bar-wrap" style="padding:0 4px 6px;">
-        <div class="ratio-bar-track">
-          <div class="ratio-bar-fill" id="bar_${staffId}_${m.key}"
-               style="width:${pct}%;background:${m.color}"></div>
-        </div>
-      </td>
-    </tr>`;
+    <div class="menu-row">
+      <div class="menu-name"><span class="mdot" style="background:${m.color}"></span>${m.label}</div>
+      <div class="unit-price">${m.price.toLocaleString()}円</div>
+      <input class="num-input" type="number" min="0" inputmode="numeric"
+        id="inp_${sid}_${m.key}"
+        value="${cnt || ''}" placeholder="0"
+        onfocus="this.value=this.value||''"
+        oninput="onInput('${sid}')">
+      <div class="row-pct" id="pct_${sid}_${m.key}" style="color:${m.color}">${pct?pct+'%':'—'}</div>
+    </div>
+    <div class="bar-row"><div class="bar-fill" id="bar_${sid}_${m.key}" style="width:${pct}%;background:${m.color}"></div></div>`;
   }).join('');
 
-  updateSummary(staffId);
+  updateFooterSum(sid);
 }
 
-// ── カード開閉 ──
-function toggleCard(staffId) {
-  const card = document.getElementById('card_' + staffId);
-  card.classList.toggle('open');
-}
-
-// ── 入力時リアルタイム更新 ──
-function onInput(staffId) {
-  // 構成比リアルタイム更新
-  let totalSales = 0;
-  MENUS.forEach(m => {
-    const v = parseInt(document.getElementById(`inp_${staffId}_${m.key}_sales`)?.value) || 0;
-    totalSales += v;
+function onInput(sid) {
+  const menus = getMenus();
+  const totalSales = menus.reduce((a,m) => {
+    const cnt = parseInt(document.getElementById(`inp_${sid}_${m.key}`)?.value) || 0;
+    return a + cnt * m.price;
+  }, 0);
+  menus.forEach(m => {
+    const cnt   = parseInt(document.getElementById(`inp_${sid}_${m.key}`)?.value) || 0;
+    const sales = cnt * m.price;
+    const pct   = totalSales ? Math.round(sales / totalSales * 100) : 0;
+    const pe = document.getElementById(`pct_${sid}_${m.key}`);
+    const be = document.getElementById(`bar_${sid}_${m.key}`);
+    if (pe) pe.textContent = totalSales ? pct + '%' : '—';
+    if (be) be.style.width = pct + '%';
   });
-  MENUS.forEach(m => {
-    const v   = parseInt(document.getElementById(`inp_${staffId}_${m.key}_sales`)?.value) || 0;
-    const pct = totalSales ? Math.round(v / totalSales * 100) : 0;
-    const ratioEl = document.getElementById(`ratio_${staffId}_${m.key}`);
-    const barEl   = document.getElementById(`bar_${staffId}_${m.key}`);
-    if (ratioEl) ratioEl.textContent = totalSales ? pct + '%' : '—';
-    if (barEl)   barEl.style.width   = pct + '%';
+  updateFooterSum(sid);
+}
+
+function updateFooterSum(sid) {
+  const menus = getMenus();
+  let cnt = 0, sales = 0;
+  menus.forEach(m => {
+    const c = parseInt(document.getElementById(`inp_${sid}_${m.key}`)?.value) || 0;
+    cnt   += c;
+    sales += c * m.price;
   });
-  updateSummary(staffId);
+  const el = document.getElementById('fsum_' + sid);
+  if (el) el.innerHTML = `<span>${cnt}件 / <span>${yen(sales)}</span></span>`;
 }
 
-function updateSummary(staffId) {
-  let totalCnt = 0, totalSales = 0;
-  MENUS.forEach(m => {
-    totalCnt   += parseInt(document.getElementById(`inp_${staffId}_${m.key}_cnt`)?.value)   || 0;
-    totalSales += parseInt(document.getElementById(`inp_${staffId}_${m.key}_sales`)?.value) || 0;
-  });
-  const el = document.getElementById('sum_' + staffId);
-  if (el) el.innerHTML = `
-    <span class="sum-chip">件数 <span>${totalCnt}件</span></span>
-    <span class="sum-chip" style="margin-left:12px;">売上 <span>${totalSales ? totalSales.toLocaleString() + '円' : '—'}</span></span>
-  `;
+function toggleCard(sid) {
+  document.getElementById('card_' + sid).classList.toggle('open');
 }
 
-// ── ゼロクリア ──
-function clearZero(el) {
-  if (el.value === '0' || el.value === '') el.value = '';
-}
-function restoreZero(el) {
-  if (el.value === '') el.value = '';
-}
-
-// ── 保存 ──
-function saveStaff(staffId) {
-  const data = Object.fromEntries(MENUS.map(m => [m.key, {
-    cnt:   parseInt(document.getElementById(`inp_${staffId}_${m.key}_cnt`)?.value)   || 0,
-    sales: parseInt(document.getElementById(`inp_${staffId}_${m.key}_sales`)?.value) || 0,
-  }]));
-  setStaffDay(currentMonth, currentDay, staffId, data);
+function saveStaff(sid) {
+  const menus = getMenus();
+  const data = Object.fromEntries(menus.map(m => [
+    m.key, parseInt(document.getElementById(`inp_${sid}_${m.key}`)?.value) || 0
+  ]));
+  setStaffDay(currentMonth, currentDay, sid, data);
   showToast('✓ 保存しました');
-  // ヘッダーの合計を更新
-  buildContent();
-  // 保存後も該当カードを開いたままにする
+  buildInputContent();
   setTimeout(() => {
-    const card = document.getElementById('card_' + staffId);
-    if (card) card.classList.add('open');
-  }, 50);
+    document.getElementById('card_' + sid)?.classList.add('open');
+  }, 60);
 }
 
+// ══ メニューマスタ ══
+function buildMaster() {
+  const menus = getMenus();
+  document.getElementById('masterRows').innerHTML = menus.map(m => `
+    <div class="master-row">
+      <div class="master-label"><span class="mdot" style="background:${m.color}"></span>${m.label}</div>
+      <div></div>
+      <div class="master-price-wrap">
+        <input class="master-input" type="number" min="0" inputmode="numeric"
+          id="mp_${m.key}" value="${m.price}"
+          onfocus="if(this.value==='0')this.value=''">
+        <span class="yen-label">円</span>
+      </div>
+      <div></div>
+    </div>`).join('');
+}
+
+function saveMaster() {
+  const menus = getMenus();
+  menus.forEach(m => {
+    const v = parseInt(document.getElementById('mp_' + m.key)?.value) || 0;
+    m.price = v;
+  });
+  saveMenusToStorage(menus);
+  showToast('✓ メニュー設定を保存しました');
+}
+
+// ══ Toast ══
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg; t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2000);
+  setTimeout(() => t.classList.remove('show'), 2200);
 }
 
-// ── 初期化 ──
-buildMonthTabs();
-buildDateSelect();
-buildContent();
+// ══ Init ══
+buildCtrls();
+buildInputContent();
 </script>
 </body>
 </html>

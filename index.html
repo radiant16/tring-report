@@ -448,23 +448,22 @@ const DATA = {
   }
 };
 
-// ══ localStorage からデータ取得（なければハードコードのサンプルを使用） ══
+// ══ localStorage からデータ取得（なければnull） ══
 function loadData(key) {
   const raw = localStorage.getItem('tring_' + key);
   if (raw) {
     const d = JSON.parse(raw);
-    // salesPrev / avgPrev を自動計算
     const keys = MONTHS.map(m=>m.key);
     const idx = keys.indexOf(key);
     const prevKey = idx > 0 ? keys[idx-1] : null;
     const prev = prevKey ? loadData(prevKey) : null;
     d.salesPrev   = prev ? prev.sales    : d.sales;
     d.clientsPrev = prev ? prev.clients  : d.clients;
-    d.avgPrev     = prev ? Math.round(prev.sales/prev.clients||0) : Math.round(d.sales/d.clients||0);
+    d.avgPrev     = prev ? Math.round(prev.sales/(prev.clients||1)) : Math.round(d.sales/(d.clients||1));
     d.avgPrice    = d.clients ? Math.round(d.sales/d.clients) : 0;
     return d;
   }
-  return DATA[key];
+  return null; // データなし
 }
 let currentIdx=0;
 const track=document.getElementById('slidesTrack');
@@ -537,6 +536,29 @@ function prevKey(){const i=MONTHS.findIndex(m=>m.key===currentMonth);return i>0?
 function renderAll(){
   document.querySelectorAll('.kpi-card.expanded').forEach(c=>c.classList.remove('expanded'));
   const d = loadData(currentMonth);
+
+  if (!d) {
+    // データなし表示
+    ['kpi-sales','kpi-clients','kpi-avg','kpi-new'].forEach(id=>{
+      document.getElementById(id).textContent = '—';
+    });
+    ['kpi-sales-badge','kpi-clients-badge','kpi-avg-badge','kpi-new-badge'].forEach(id=>{
+      const el = document.getElementById(id);
+      el.className = 'kpi-badge'; el.textContent = '';
+    });
+    ['kpi-sales-detail','kpi-clients-detail','kpi-avg-detail','kpi-new-detail'].forEach(id=>{
+      document.getElementById(id).innerHTML = '<div style="font-size:11px;color:var(--muted);padding:4px 0;">管理画面からデータを入力してください</div>';
+    });
+    document.getElementById('donutSvg').innerHTML = `
+      <circle cx="55" cy="55" r="38" fill="none" stroke="#e8e4de" stroke-width="18"/>
+      <circle cx="55" cy="55" r="29" fill="white"/>
+      <text x="55" y="59" text-anchor="middle" fill="#b0a89e" font-size="10" font-family="Meiryo">未入力</text>`;
+    document.getElementById('donutLegend').innerHTML = '';
+    document.getElementById('staffList').innerHTML = `<div style="text-align:center;padding:40px 0;color:var(--muted);font-size:13px;">管理画面からデータを入力してください</div>`;
+    document.getElementById('serviceGrid').innerHTML = '';
+    document.getElementById('staffMenuBreakdown').innerHTML = '';
+    return;
+  }
 
   document.getElementById('kpi-sales').textContent=fmtYen(d.sales);
   setBadge('kpi-sales-badge',d.sales,d.salesPrev);

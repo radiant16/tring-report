@@ -1,976 +1,285 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>T ring 天王町 — Sales Report</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
-<style>
-:root{
-  --bg:#8a8680; --bg2:#6e6a65;
-  --card:#ffffff; --card2:#f5f4f2;
-  --border:#dddad5; --border2:#e8e5e0;
-  --ink:#2a2825; --ink2:#3d3a36;
-  --muted:#888078; --muted2:#b0a89e;
-  --gold:#9a7e5a; --gold-l:#b89a70;
-  --sage:#4e8a68; --sky:#4a6e8a;
-  --rose:#a04848; --lav:#6a607a;
-  --radius:14px; --nav-h:68px;
-}
-*{box-sizing:border-box;margin:0;padding:0;}
-html,body{height:100%;overflow:hidden;font-family:'Meiryo','メイリオ','Hiragino Kaku Gothic ProN',sans-serif;background:var(--bg);color:var(--ink);font-weight:400;-webkit-font-smoothing:antialiased;}
-
-/* Header */
-.header{background:var(--bg2);border-bottom:1px solid rgba(0,0,0,.15);padding:48px 20px 14px;position:fixed;top:0;left:0;right:0;z-index:20;}
-.header-top{display:flex;justify-content:space-between;align-items:center;}
-.salon-name-en{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:300;font-size:22px;color:#fff;letter-spacing:.06em;line-height:1;}
-.salon-name-sub{font-size:9px;color:rgba(255,255,255,.5);letter-spacing:.18em;text-transform:uppercase;margin-top:3px;}
-.month-badge{border:1px solid rgba(255,255,255,.35);color:rgba(255,255,255,.9);background:transparent;font-size:11px;padding:6px 14px;border-radius:20px;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;display:flex;align-items:center;gap:6px;letter-spacing:.04em;transition:background .2s;}
-.month-badge:active{background:rgba(255,255,255,.08);}
-.badge-arrow{font-size:9px;color:rgba(255,255,255,.5);}
-
-/* Month overlay */
-.month-overlay{display:none;position:fixed;inset:0;z-index:40;background:rgba(30,28,25,.6);backdrop-filter:blur(6px);align-items:flex-start;justify-content:flex-end;padding:100px 18px 0;}
-.month-overlay.open{display:flex;}
-.month-picker{background:var(--card2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;min-width:180px;box-shadow:0 16px 48px rgba(0,0,0,.2);animation:dropIn .18s ease;}
-@keyframes dropIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
-.month-picker-title{font-size:10px;color:var(--muted);letter-spacing:.18em;padding:12px 16px 9px;border-bottom:1px solid var(--border);text-transform:uppercase;}
-.month-option{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;cursor:pointer;transition:background .15s;border-bottom:1px solid var(--border2);-webkit-tap-highlight-color:transparent;}
-.month-option:last-child{border-bottom:none;}
-.month-option:active{background:rgba(0,0,0,.04);}
-.month-option.selected{background:rgba(154,126,90,.08);}
-.month-option-label{font-size:14px;font-weight:400;color:var(--ink);}
-.month-option-sub{font-size:11px;color:var(--muted);margin-top:2px;}
-.month-option.selected .month-option-label{color:var(--gold);}
-.month-check{color:var(--gold);font-size:13px;opacity:0;}
-.month-option.selected .month-check{opacity:1;}
-
-/* Viewport */
-.viewport{position:fixed;left:0;right:0;bottom:var(--nav-h);overflow:hidden;}
-.slides-track{display:flex;width:300%;height:100%;will-change:transform;}
-.slide{width:calc(100%/3);height:100%;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:18px 14px calc(18px + env(safe-area-inset-bottom));}
-
-/* Bottom nav */
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;height:var(--nav-h);background:var(--bg2);border-top:1px solid rgba(0,0,0,.15);display:flex;align-items:center;padding:0 10px;padding-bottom:env(safe-area-inset-bottom);z-index:20;gap:6px;}
-.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;-webkit-tap-highlight-color:transparent;height:52px;border-radius:12px;transition:background .25s,border-color .25s;border:1px solid transparent;}
-.nav-item.active{background:rgba(255,255,255,.1);border-color:var(--gold-l);}
-.nav-icon{display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.45);transition:transform .3s cubic-bezier(.34,1.56,.64,1),color .25s;}
-.nav-label{font-size:10px;font-weight:400;color:rgba(255,255,255,.45);transition:color .25s;letter-spacing:.06em;}
-.nav-item.active .nav-label{color:var(--gold-l);font-weight:500;}
-.nav-item.active .nav-icon{transform:scale(1.1);color:var(--gold-l);}
-
-/* Admin link */
-.admin-link{position:fixed;bottom:calc(var(--nav-h) + 10px);right:14px;z-index:19;background:var(--bg2);color:rgba(255,255,255,.75);font-size:11px;padding:6px 14px;border-radius:20px;border:1px solid rgba(255,255,255,.2);text-decoration:none;letter-spacing:.06em;box-shadow:0 2px 8px rgba(0,0,0,.2);}
-
-/* Section label */
-.sec-label{font-size:10px;letter-spacing:.14em;color:var(--muted);margin-bottom:12px;margin-top:24px;text-transform:uppercase;}
-.sec-label:first-child{margin-top:0;}
-
-/* KPI cards */
-.kpi-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
-.kpi-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;position:relative;overflow:hidden;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:border-color .2s;}
-.kpi-card.expanded{border-color:var(--gold);}
-.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
-.kpi-card.c-gold::before{background:var(--gold-l);}
-.kpi-card.c-sage::before{background:var(--sage);}
-.kpi-card.c-sky::before{background:var(--sky);}
-.kpi-card.c-rose::before{background:var(--rose);}
-.kpi-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
-.kpi-label{font-size:11px;color:var(--muted);}
-.kpi-arrow{font-size:11px;color:var(--muted2);transition:transform .2s;}
-.kpi-card.expanded .kpi-arrow{transform:rotate(180deg);color:var(--gold);}
-.kpi-value{font-size:20px;font-weight:600;color:var(--ink);line-height:1.2;word-break:break-all;}
-.kpi-badge{display:inline-block;font-size:10px;padding:3px 9px;border-radius:20px;margin-top:7px;font-weight:500;letter-spacing:.04em;}
-.kpi-badge.up{background:#5a9e78;color:#fff;}
-.kpi-badge.down{background:#b85c5c;color:#fff;}
-.kpi-detail{display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--border2);}
-.kpi-card.expanded .kpi-detail{display:block;}
-.kpi-detail-row{display:flex;justify-content:space-between;align-items:center;font-size:11px;margin-bottom:8px;}
-.kpi-detail-row:last-child{margin-bottom:0;}
-.kpi-detail-name{color:var(--muted);}
-.kpi-detail-val{font-weight:500;color:var(--ink2);}
-.kpi-mini-bar{width:100%;height:3px;background:var(--border);border-radius:2px;margin:5px 0 9px;overflow:hidden;}
-.kpi-mini-bar-fill{height:100%;border-radius:2px;}
-
-/* Donut */
-.donut-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;}
-.pie-title{font-size:13px;font-weight:500;margin-bottom:16px;color:var(--ink2);}
-.pie-wrap{display:flex;align-items:center;gap:18px;}
-svg.pie{flex-shrink:0;}
-.legend{flex:1;display:flex;flex-direction:column;gap:10px;}
-.legend-item{display:flex;align-items:center;gap:8px;}
-.legend-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0;}
-.legend-name{font-size:11px;color:var(--muted);flex:1;}
-.legend-pct{font-size:13px;font-weight:600;color:var(--ink);}
-
-/* Staff cards */
-.staff-list{display:flex;flex-direction:column;gap:10px;}
-.staff-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:border-color .2s;}
-.staff-card.expanded{border-color:var(--gold);}
-.staff-header{display:flex;align-items:center;gap:12px;}
-.avatar{width:40px;height:40px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;border:1px solid var(--border);}
-.staff-info{flex:1;min-width:0;}
-.staff-name{font-size:14px;font-weight:500;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.staff-role{font-size:11px;color:var(--muted);margin-top:2px;}
-.staff-right{text-align:right;flex-shrink:0;}
-.staff-sales-val{font-size:13px;font-weight:600;color:var(--gold);}
-.staff-sales-cnt{font-size:10px;color:var(--muted);margin-top:2px;}
-.rank{width:18px;height:18px;border-radius:5px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:500;margin-left:4px;vertical-align:middle;}
-.rank-1{background:rgba(184,154,112,.2);color:var(--gold);}
-.rank-2{background:rgba(0,0,0,.06);color:var(--muted);}
-.rank-3{background:rgba(0,0,0,.04);color:var(--muted2);}
-.chevron{font-size:12px;color:var(--muted2);transition:transform .2s;flex-shrink:0;}
-.staff-card.expanded .chevron{transform:rotate(180deg);color:var(--gold);}
-.breakdown{display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--border2);}
-.staff-card.expanded .breakdown{display:block;}
-.bar-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
-.bar-label{font-size:10px;color:var(--muted);width:68px;flex-shrink:0;}
-.bar-track{flex:1;height:4px;background:var(--border);border-radius:3px;overflow:hidden;}
-.bar-fill{height:100%;border-radius:3px;}
-.bar-val{font-size:10px;color:var(--ink2);width:36px;text-align:right;flex-shrink:0;}
-
-/* Service grid */
-.service-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.service-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 14px;text-align:center;}
-.service-icon{display:flex;align-items:center;justify-content:center;margin-bottom:8px;color:rgba(42,40,37,.4);}
-.service-name{font-size:11px;color:var(--muted);letter-spacing:.06em;margin-bottom:6px;}
-.service-pct{font-size:28px;font-weight:600;color:var(--ink);line-height:1;}
-.service-pct span{font-size:14px;}
-.service-cnt{font-size:10px;color:var(--muted);margin-top:8px;line-height:2;}
-
-/* Staff×Menu */
-.sbdown-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
-.divider{height:1px;background:var(--border2);margin:10px 0;}
-
-/* No data */
-.no-data{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 24px;text-align:center;color:var(--muted);}
-.no-data-icon{font-size:36px;margin-bottom:16px;opacity:.4;}
-.no-data-text{font-size:13px;line-height:1.8;}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Market Brief">
+  <meta name="theme-color" content="#0a0a0f">
+  <link rel="apple-touch-icon" href="icon.png">
+  <link rel="manifest" href="manifest.json">
+  <title>マーケットデイリーブリーフ</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+    body{background:#0a0a0f;color:#e8e8f0;font-family:'Courier New',monospace;min-height:100vh;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+    .grid{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(0,255,180,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,180,0.03) 1px,transparent 1px);background-size:40px 40px}
+    .wrap{max-width:600px;margin:0 auto;padding:20px 14px 48px;position:relative;z-index:1}
+    h1{font-size:22px;font-weight:900;letter-spacing:-1px;margin:0 0 2px;background:linear-gradient(135deg,#fff 60%,#00ffb4);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .badge{display:flex;align-items:center;gap:8px;margin-bottom:2px}
+    .dot{width:7px;height:7px;border-radius:50%;background:#00ffb4;box-shadow:0 0 10px #00ffb4;animation:pulse 2s infinite}
+    .badge-txt{font-size:10px;color:#00ffb4;letter-spacing:3px}
+    .date-txt{font-size:10px;color:#444}
+    .copy-hdr{font-size:11px;color:#fff;margin-top:4px;letter-spacing:3px;font-weight:600}
+    .tabs{display:flex;gap:5px;margin:14px 0}
+    .tab{flex:1;padding:9px 2px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.08);border-radius:3px;color:#555;font-family:'Courier New',monospace;font-size:10px;cursor:pointer;letter-spacing:.5px;transition:all .2s}
+    .tab.on{background:rgba(0,255,180,0.12);border-color:rgba(0,255,180,0.4);color:#00ffb4}
+    .fetch-btn{width:100%;padding:13px;background:linear-gradient(135deg,#00ffb4,#00cc90);border:none;border-radius:4px;color:#000;font-family:'Courier New',monospace;font-size:12px;font-weight:700;letter-spacing:2px;cursor:pointer;margin-bottom:14px;box-shadow:0 0 16px rgba(0,255,180,0.25)}
+    .fetch-btn:disabled{background:#111;color:#444;box-shadow:none;cursor:not-allowed}
+    .summary-card{padding:16px;background:rgba(0,255,180,0.05);border:1px solid rgba(0,255,180,0.2);border-radius:4px;margin-bottom:10px}
+    .card-lbl{font-size:10px;color:#00ffb4;letter-spacing:2px;margin-bottom:6px}
+    .card-title{font-size:17px;font-weight:700;margin-bottom:10px}
+    .tags{display:flex;gap:8px;flex-wrap:wrap}
+    .tag-dir{padding:3px 10px;background:rgba(0,255,180,0.08);border:1px solid rgba(0,255,180,0.2);border-radius:2px;font-size:12px;font-weight:700}
+    .tag-conf{padding:3px 10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:2px;font-size:11px;color:#666}
+    .plain{padding:12px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.07);border-radius:4px;margin-bottom:8px}
+    .sec-lbl{font-size:10px;color:#444;letter-spacing:2px;margin-bottom:8px}
+    .pair-tabs{display:flex;gap:5px;margin-bottom:6px;overflow-x:auto}
+    .pair-btn{padding:5px 7px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.1);border-radius:2px;color:#555;font-family:'Courier New',monospace;font-size:9px;cursor:pointer;white-space:nowrap}
+    .pair-btn.on{background:rgba(0,255,180,0.15);border-color:rgba(0,255,180,0.5);color:#00ffb4}
+    .rate-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+    .rate-lbl{font-size:9px;color:#444;margin-bottom:2px}
+    .rate-val{font-size:20px;font-weight:900}
+    .rate-ask{font-size:12px;color:#444}
+    .rate-chg{font-size:14px;font-weight:700}
+    .rate-foot{display:flex;justify-content:space-between;font-size:10px;color:#444}
+    .idx-cards{display:flex;gap:5px;margin-bottom:10px;flex-wrap:wrap}
+    .idx-card{flex:1;min-width:80px;padding:10px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.07);border-radius:4px;text-align:center}
+    .idx-name{font-size:9px;color:#555;margin-bottom:2px}
+    .idx-val{font-size:14px;font-weight:900;margin-bottom:2px}
+    .idx-pct{font-size:10px;font-weight:700}
+    .news-item{padding:12px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:0 4px 4px 0;margin-bottom:6px}
+    .news-hdr{display:flex;justify-content:space-between;margin-bottom:4px;align-items:flex-start;gap:6px}
+    .news-meta{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+    .news-cat{font-size:10px}
+    .imp-badge{font-size:9px;padding:1px 5px;border-radius:2px}
+    .news-dir{font-size:10px;white-space:nowrap}
+    .news-title{font-size:12px;font-weight:700;margin-bottom:3px}
+    .news-detail{font-size:11px;color:#555;line-height:1.5;margin-bottom:4px}
+    .news-src{font-size:9px;color:#00ffb4;opacity:.7}
+    .watch-card{padding:12px;background:rgba(255,170,0,0.05);border:1px solid rgba(255,170,0,0.2);border-radius:4px;margin-bottom:14px}
+    .watch-lbl{font-size:10px;color:#ffaa00;letter-spacing:2px;margin-bottom:4px}
+    .watch-txt{font-size:12px;line-height:1.6}
+    .stock-row{padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.05)}
+    .stock-row:last-child{border-bottom:none}
+    .stock-main{display:flex;justify-content:space-between;align-items:center}
+    .stock-name{font-size:12px;font-weight:700}
+    .stock-code{font-size:9px;color:#444}
+    .stock-val{font-size:12px;font-weight:700;text-align:right}
+    .stock-pct{font-size:10px;text-align:right}
+    .stock-note{font-size:10px;color:#555;margin-top:3px;line-height:1.4}
+    .fund-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.05)}
+    .fund-row:last-child{border-bottom:none}
+    .fund-name{font-size:11px;font-weight:700;line-height:1.4}
+    .fund-nav{font-size:9px;color:#444;margin-top:1px}
+    .fund-gain{font-size:11px;font-weight:700;white-space:nowrap}
+    .total-card{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(0,255,180,0.06);border:1px solid rgba(0,255,180,0.2);border-radius:4px;margin-bottom:10px}
+    .footer-note{text-align:center;font-size:10px;color:#1a1a2e;padding-top:8px}
+    .footer-copy{text-align:center;font-size:11px;color:#fff;padding-top:4px;letter-spacing:3px;font-weight:600}
+    .empty{text-align:center;padding:50px 0;color:#2a2a3a;font-size:12px}
+    .panel{display:none}.panel.on{display:block}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+    @supports(padding-top:env(safe-area-inset-top)){.wrap{padding-top:max(20px,env(safe-area-inset-top))}}
+  </style>
 </head>
 <body>
-
-<div class="month-overlay" id="monthOverlay" onclick="closeMonthPicker(event)">
-  <div class="month-picker" id="monthPicker">
-    <div class="month-picker-title">Month</div>
+<div class="grid"></div>
+<div class="wrap">
+  <div style="margin-bottom:14px">
+    <div class="badge"><div class="dot"></div><span class="badge-txt">MARKET INTELLIGENCE</span></div>
+    <h1>マーケットデイリーブリーフ</h1>
+    <div class="date-txt">2026年4月24日（金）更新</div>
+    <div class="copy-hdr">© KATANO HIKARU</div>
+    <div style="font-size:9px;color:#333;margin-top:2px;letter-spacing:2px">v4.2</div>
   </div>
+  <div style="margin-bottom:10px">
+    <button onclick="toggleBN(this)" style="background:none;border:1px solid rgba(255,255,255,0.1);border-radius:3px;color:#555;font-size:9px;padding:4px 10px;cursor:pointer;font-family:'Courier New',monospace;letter-spacing:1px;width:100%">📁 バックナンバー（過去1週間） ▼</button>
+    <div id="bn-body" style="display:none;margin-top:6px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:4px;overflow:hidden">
+      <div style="display:flex;padding:4px 10px;border-bottom:1px solid rgba(255,255,255,0.06)">
+        <span style="font-size:8px;color:#333;min-width:56px">日付</span>
+        <span style="font-size:8px;color:#333;flex:1">サマリー</span>
+        <span style="font-size:8px;color:#333;min-width:44px;text-align:right">日経</span>
+        <span style="font-size:8px;color:#333;min-width:42px;text-align:right">$/¥</span>
+        <span style="font-size:8px;color:#333;min-width:32px;text-align:right">WTI</span>
+      </div>
+      <div id="bn-list"></div>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tab on" onclick="switchTab('fx',this)">📰 為替</button>
+    <button class="tab"    onclick="switchTab('jp',this)">🇯🇵 国内株</button>
+    <button class="tab"    onclick="switchTab('us',this)">🇺🇸 米国株</button>
+    <button class="tab"    onclick="switchTab('funds',this)">📊 投信</button>
+    <button class="tab"    onclick="switchTab('re',this)">🏠 不動産</button>
+  </div>
+  <div style="padding:10px 12px;background:rgba(255,50,50,0.06);border:1px solid rgba(255,80,80,0.2);border-radius:4px;margin-bottom:10px">
+    <div style="font-size:9px;color:#ff6b6b;letter-spacing:2px;margin-bottom:6px;font-weight:700">🌐 地政学リスク（Polymarket / 4月24日時点）</div>
+    <div style="font-size:9px;color:#555;margin-bottom:6px">⚔ 米イラン空爆作戦継続中・停戦延長でイスラマバード交渉へ</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">
+      <div style="flex:1;min-width:100px;padding:6px 8px;background:rgba(255,255,255,0.03);border-radius:3px;border:1px solid rgba(255,255,255,0.06)">
+        <div style="font-size:9px;color:#555;margin-bottom:2px">地上部隊のイラン侵入（年内）</div>
+        <div style="font-size:14px;font-weight:900;color:#ff6b6b">95%</div>
+      </div>
+      <div style="flex:1;min-width:100px;padding:6px 8px;background:rgba(255,255,255,0.03);border-radius:3px;border:1px solid rgba(255,255,255,0.06)">
+        <div style="font-size:9px;color:#555;margin-bottom:2px">紛争終結（年内）</div>
+        <div style="font-size:14px;font-weight:900;color:#4ecdc4">86%</div>
+      </div>
+      <div style="flex:1;min-width:100px;padding:6px 8px;background:rgba(255,255,255,0.03);border-radius:3px;border:1px solid rgba(255,255,255,0.06)">
+        <div style="font-size:9px;color:#555;margin-bottom:2px">宣戦布告（年内）</div>
+        <div style="font-size:14px;font-weight:900;color:#888">8%</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:12px;font-size:10px;margin-bottom:8px">
+      <span style="color:#555">😱 VIX <span style="color:#ffaa00;font-weight:700">18.71</span> <span style="font-size:9px;color:#444">やや上昇・要注意</span></span>
+      <span style="color:#555">🛢 WTI原油 <span style="color:#ffaa00;font-weight:700">$94.4</span> <span style="font-size:9px;color:#444">ホルムズ緊張で高止まり</span></span>
+    </div>
+    <div style="padding:6px 8px;background:rgba(255,170,0,0.05);border:1px solid rgba(255,170,0,0.15);border-radius:3px;display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div style="font-size:9px;color:#ffaa00;margin-bottom:1px">🍕 ペンタゴン・ピザメーター（PizzINT）</div>
+        <div style="font-size:10px;color:#888">Busier than usual — 複数店舗で活発な動き</div>
+      </div>
+      <div style="font-size:12px;font-weight:900;color:#ffaa00">🔴 HIGH</div>
+    </div>
+  </div>
+  <div style="text-align:center;font-size:9px;color:#333;margin-bottom:8px;letter-spacing:1px">← スワイプで切替 →</div>
+  <div id="panel-fx" class="panel on">
+    <button class="fetch-btn" id="btn-fx" onclick="showPanel('fx')">▶ 今日の為替情報を取得</button>
+    <div id="content-fx" style="display:none"></div>
+    <div id="empty-fx" class="empty">ボタンを押して為替情報を取得</div>
+  </div>
+  <div id="panel-jp" class="panel">
+    <button class="fetch-btn" id="btn-jp" onclick="showPanel('jp')">▶ 今日の国内株情報を取得</button>
+    <div id="content-jp" style="display:none"></div>
+    <div id="empty-jp" class="empty">ボタンを押して国内株情報を取得</div>
+  </div>
+  <div id="panel-us" class="panel">
+    <button class="fetch-btn" id="btn-us" onclick="showPanel('us')">▶ 今日の米国株情報を取得</button>
+    <div id="content-us" style="display:none"></div>
+    <div id="empty-us" class="empty">ボタンを押して米国株情報を取得</div>
+  </div>
+  <div id="panel-funds" class="panel">
+    <button class="fetch-btn" id="btn-funds" onclick="showPanel('funds')">▶ 今日の投資信託情報を取得</button>
+    <div id="content-funds" style="display:none"></div>
+    <div id="empty-funds" class="empty">ボタンを押して投資信託情報を取得</div>
+  </div>
+  <div id="panel-re" class="panel">
+    <button class="fetch-btn" id="btn-re" onclick="showPanel('re')">▶ 今日の不動産情報を取得</button>
+    <div id="content-re" style="display:none"></div>
+    <div id="empty-re" class="empty">ボタンを押して不動産情報を取得</div>
+  </div>
+  <div class="footer-note">※投資判断はご自身の責任で行ってください</div>
+  <div class="footer-copy">© KATANO HIKARU</div>
 </div>
-
-<div class="header">
-  <div class="header-top">
-    <div>
-      <div class="salon-name-en">T ring 天王町</div>
-      <div class="salon-name-sub">Sales Report</div>
-    </div>
-    <div class="month-badge" id="monthBadge" onclick="openMonthPicker()">
-      <span id="monthBadgeText">—</span>
-      <span class="badge-arrow">▾</span>
-    </div>
-  </div>
-</div>
-
-<div class="viewport" id="viewport">
-  <div class="slides-track" id="slidesTrack">
-    <div class="slide" id="slide-0">
-      <div class="sec-label">Summary</div>
-      <div class="kpi-row">
-        <div class="kpi-card c-gold" onclick="toggleKpi(this)">
-          <div class="kpi-top"><div class="kpi-label">総売上</div><div class="kpi-arrow">▾</div></div>
-          <div class="kpi-value" id="kpi-sales">—</div>
-          <div class="kpi-badge" id="kpi-sales-badge"></div>
-          <div class="kpi-detail" id="kpi-sales-detail"></div>
-        </div>
-        <div class="kpi-card c-sage" onclick="toggleKpi(this)">
-          <div class="kpi-top"><div class="kpi-label">来客数</div><div class="kpi-arrow">▾</div></div>
-          <div class="kpi-value" id="kpi-clients">—</div>
-          <div class="kpi-badge" id="kpi-clients-badge"></div>
-          <div class="kpi-detail" id="kpi-clients-detail"></div>
-        </div>
-      </div>
-      <div class="kpi-row">
-        <div class="kpi-card c-sky" onclick="toggleKpi(this)">
-          <div class="kpi-top"><div class="kpi-label">客単価</div><div class="kpi-arrow">▾</div></div>
-          <div class="kpi-value" id="kpi-avg">—</div>
-          <div class="kpi-badge" id="kpi-avg-badge"></div>
-          <div class="kpi-detail" id="kpi-avg-detail"></div>
-        </div>
-        <div class="kpi-card c-rose" onclick="toggleKpi(this)">
-          <div class="kpi-top"><div class="kpi-label">メニュー数</div><div class="kpi-arrow">▾</div></div>
-          <div class="kpi-value" id="kpi-menu">—</div>
-          <div class="kpi-badge" id="kpi-menu-badge"></div>
-          <div class="kpi-detail" id="kpi-menu-detail"></div>
-        </div>
-      </div>
-      <div class="sec-label">Menu Ratio</div>
-      <div class="donut-wrap">
-        <div class="pie-title">メニュー構成比</div>
-        <div class="pie-wrap">
-          <svg class="pie" width="110" height="110" viewBox="0 0 110 110" id="donutSvg"></svg>
-          <div class="legend" id="donutLegend"></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="slide" id="slide-1">
-      <div class="sec-label">Staff Ranking</div>
-      <div class="staff-list" id="staffList"></div>
-    </div>
-
-    <div class="slide" id="slide-2">
-      <div class="sec-label">Menu</div>
-      <div class="service-grid" id="serviceGrid"></div>
-      <div class="sec-label" style="margin-top:20px;">Staff × Menu</div>
-      <div class="sbdown-wrap">
-        <div id="staffMenuBreakdown" style="display:flex;flex-direction:column;gap:14px;"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<a href="admin.html" class="admin-link">管理画面</a>
-
-<nav class="bottom-nav">
-  <div class="nav-item active" id="nav-0" onclick="goTo(0)">
-    <div class="nav-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="8" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="11" width="7" height="10" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></div>
-    <div class="nav-label">全体</div>
-  </div>
-  <div class="nav-item" id="nav-1" onclick="goTo(1)">
-    <div class="nav-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="3"/><circle cx="17" cy="8" r="2.5"/><path d="M2 20c0-3.3 3.1-6 7-6s7 2.7 7 6"/><path d="M22 20c0-2.5-2.2-4.5-5-4.5"/></svg></div>
-    <div class="nav-label">スタッフ</div>
-  </div>
-  <div class="nav-item" id="nav-2" onclick="goTo(2)">
-    <div class="nav-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg></div>
-    <div class="nav-label">メニュー</div>
-  </div>
-</nav>
-
 <script>
-// ══ 定数 ══
-const STAFF = [
-  {id:'yamashita', name:'山下 大貴', role:'Top Stylist', ini:'山下', bg:'rgba(184,154,112,.15)', tc:'#b89a70'},
-  {id:'araki',     name:'新木 彩加',  role:'Top Stylist', ini:'新木', bg:'rgba(122,170,138,.15)', tc:'#7aaa8a'},
-  {id:'tomioka',   name:'富岡 輝',   role:'Top Stylist', ini:'富岡', bg:'rgba(122,174,201,.15)', tc:'#7aaec9'},
-  {id:'hatanaka',  name:'畑中 守',   role:'Manager',     ini:'畑中', bg:'rgba(160,142,201,.15)', tc:'#a08ec9'},
-  {id:'migihashi', name:'右橋 陸',   role:'Manager',     ini:'右橋', bg:'rgba(212,135,122,.15)', tc:'#d4877a'},
-  {id:'fujita',    name:'藤田 龍法', role:'Owner',       ini:'藤田', bg:'rgba(200,184,160,.15)', tc:'#b09a70'},
+const FX={summary:"米イラン和平再交渉期待、159円台で膠着",direction:"横ばい",confidence:"中",rates:{"USD/JPY":{bid:"159.30",ask:"159.40",change:"-0.13",range:"159.00〜159.84",bias:"横ばい"},"EUR/JPY":{bid:"188.10",ask:"188.30",change:"+0.20",range:"187.60〜188.60",bias:"ユーロ高"},"GBP/JPY":{bid:"211.50",ask:"211.80",change:"+0.10",range:"210.80〜212.20",bias:"横ばい"},"AUD/JPY":{bid:"100.80",ask:"101.10",change:"-0.10",range:"100.40〜101.40",bias:"横ばい"}},news:[{cat:"🕊 和平",title:"イラン外相がパキスタン入り、米との交渉再開へ",impact:"高",dir:"円高要因",detail:"イランのアラグチ外相がイスラマバード入り。トランプ特使が土曜に現地入りし和平交渉を再開へ。合意なら一気に円高・株高。",src:"Reuters"},{cat:"⚡ 原油",title:"WTI $94台、ホルムズ緊張続くも和平期待で上昇一服",impact:"高",dir:"中立",detail:"ホルムズ海峡でイラン砲艦が2隻に発砲も和平交渉期待で$94台に落ち着き。",src:"Bloomberg"},{cat:"🏦 日銀",title:"日銀来週会合、利上げ見送りで現状維持の見通し",impact:"高",dir:"円安要因",detail:"中東情勢リスクを評価するため日銀は4/27-28会合で利上げを見送る見通し。6月以降にシグナルを送る可能性。",src:"TradingEconomics"},{cat:"📊 経済",title:"日本のコアインフレが5カ月ぶりに加速",impact:"中",dir:"円高要因",detail:"エネルギーコスト上昇を受け日本のコアインフレが加速。日銀の正常化議論を支える材料に。",src:"Reuters"},{cat:"⚠ 介入",title:"財務省が介入警戒を維持、160円が防衛ライン",impact:"中",dir:"円高要因",detail:"財務相が「フリーハンドで介入できる」と発言。160円が防衛ラインとして強く意識されている。",src:"Reuters"}],watch:"来週のFOMC（4/29）と日銀会合（4/27-28）がダブルで控える。週末のイスラマバード和平交渉の結果次第で月曜の相場が大きく動く。"};
+const JP={summary:"日経59,716円と最高値更新、半導体18連騰が牽引",direction:"上昇",confidence:"高",indices:[{name:"日経平均",value:"59,716",pct:"+0.97%",up:true},{name:"TOPIX",value:"3,716",pct:"+0.87%",up:true}],news:[{cat:"💾 半導体",title:"SOX（半導体指数）が18連騰の記録的な連勝",impact:"高",dir:"ポジティブ",detail:"米フィラデルフィア半導体指数（SOX）が3月30日から18連騰。過去最長記録を更新中。東エレク・アドバンテストなど国内半導体株も全面高。",src:"CNBC"},{cat:"🤖 AI",title:"NvidiaがS&P500史上初の時価総額5兆ドルを回復",impact:"高",dir:"ポジティブ",detail:"NvidiaがAppleを抜き単独で時価総額5兆ドルを回復。AI半導体への需要が改めて確認され国内AI関連株にも波及。",src:"Reuters"},{cat:"🕊 和平",title:"米イラン和平再交渉期待で輸出株に買い戻し",impact:"高",dir:"ポジティブ",detail:"週末のイスラマバード交渉で合意なら原油急落・株高優勢。リスクオン全体で幅広く買われた。",src:"日経"},{cat:"🏦 日銀",title:"日銀4/27-28会合、利上げ見送りで現状維持へ",impact:"中",dir:"ネガティブ",detail:"中東情勢・エネルギー高のリスクから日銀は今回利上げを見送る見通し。6月以降にシグナルを送る可能性。",src:"TradingEconomics"},{cat:"📊 決算",title:"週間：S&P500が4週連続上昇、決算シーズン好調",impact:"中",dir:"ポジティブ",detail:"1Q決算の増益率が16.1%と当初予想14.4%を上回る好スタート。Intelが+23%急騰し2000年の最高値を更新。",src:"LSEG"}],watch:"6万円の大台が目前。週明け月曜はイスラマバード和平交渉の結果次第。合意→6万円突破も。日銀4/27-28会合は利上げ見送りでイベント通過後の反応に注目。",policy:[{theme:"💰 賃上げ・内需",impact:"ポジティブ",detail:"骨太方針2025で2029年度まで年率1%の実質賃金上昇をノルム化。物価上昇を上回る賃上げが継続すれば個人消費拡大へ。銀行・小売・内需株に追い風。"},{theme:"🤖 AI・半導体",impact:"ポジティブ",detail:"AI・半導体支援を国家戦略に位置づけ。SOX18連騰が示すようにAI需要は本物。キオクシア・さくらインターネット等の関連株にポジティブ。"},{theme:"⚡ GX・脱炭素",impact:"ポジティブ",detail:"10年間で150兆円超のGX関連投資を官民で推進。2026年度から排出量取引制度が本格稼働。再エネ・省エネ・建設関連株に恩恵。"},{theme:"📊 財政健全化",impact:"中立",detail:"2026年度に28年ぶりのPB黒字化見込み。財政規律回復は長期金利安定につながる一方、財政出動の余地縮小は景気刺激策の限界を示唆。"},{theme:"🌐 関税・通商",impact:"ネガティブ",detail:"骨太方針2025でトランプ関税への対応を明記。輸出依存度の高い自動車・電機は関税リスクが継続。国内回帰・内需型銘柄が相対的に有利。"}],stocks:[{name:"キオクシアHD",code:"285A",value:"8,120",pct:"+9.44%",up:true,note:"NAND型フラッシュ大手。AI需要急増・SOX18連騰で続騰"},{name:"東京エレクトロン",code:"8035",value:"42,300",pct:"+10.73%",up:true,note:"半導体製造装置。Intel好決算でさらに上昇"},{name:"アドバンテスト",code:"6857",value:"11,200",pct:"+13.74%",up:true,note:"半導体テスト装置。SOX18連騰の恩恵を直撃"},{name:"ソフトバンクG",code:"9984",value:"13,400",pct:"+4.28%",up:true,note:"AI投資会社。Nvidia5兆ドル回復でアームHD連動高"},{name:"さくらインターネット",code:"3778",value:"4,510",pct:"+7.13%",up:true,note:"AI・クラウドインフラ。AI相場の恩恵を享受"},{name:"三菱UFJ",code:"8306",value:"1,450",pct:"+2.11%",up:true,note:"メガバンク。金利上昇期待継続"},{name:"トヨタ",code:"7203",value:"3,100",pct:"-2.51%",up:false,note:"自動車最大手。円高警戒・エネルギー高で軟調"},{name:"任天堂",code:"7974",value:"7,980",pct:"-8.70%",up:false,note:"ゲーム大手。一時8000円割れ、採算悪化懸念"},{name:"信越化学",code:"4063",value:"6,380",pct:"+3.74%",up:true,note:"シリコンウエハー大手。半導体素材で安定収益"},{name:"ソニーG",code:"6758",value:"14,850",pct:"+4.58%",up:true,note:"エンタメ・半導体。センサー需要好調"},{name:"NTT",code:"9432",value:"165.2",pct:"+1.04%",up:true,note:"通信インフラ。IOWN構想で長期成長狙い"},{name:"ソフトバンク",code:"9434",value:"238.0",pct:"+3.03%",up:true,note:"通信最大手。AI・5G展開で安定成長"},{name:"メタプラネット",code:"3350",value:"580",pct:"+11.54%",up:true,note:"ビットコイン戦略企業。BTC77,000ドル台で急騰"},{name:"楽天グループ",code:"4755",value:"830",pct:"+2.22%",up:true,note:"EC・モバイル。財務改善が課題も株高の波に乗る"},{name:"デンソー",code:"6902",value:"2,190",pct:"-0.91%",up:false,note:"トヨタ系自動車部品。親会社軟調で連動安"},{name:"SUMCO",code:"3436",value:"2,150",pct:"+10.26%",up:true,note:"シリコンウエハー。半導体需要回復で急反発"},{name:"住友金属鉱山",code:"5713",value:"4,350",pct:"+5.58%",up:true,note:"非鉄金属。AI関連素材需要で回復"},{name:"東映アニメ",code:"4816",value:"3,050",pct:"+2.35%",up:true,note:"IPコンテンツ。海外展開・インバウンド需要"},{name:"ispace",code:"9348",value:"510",pct:"+5.15%",up:true,note:"宇宙ベンチャー。月探査ミッションへの期待"},{name:"HIOKI",code:"6866",value:"8,620",pct:"+4.61%",up:true,note:"計測器大手。決算好調継続"}]};
+const US={summary:"S&P500・NASDAQ最高値更新、Intel+23%でSOX18連騰",direction:"上昇",confidence:"高",indices:[{name:"NYダウ",value:"49,230",pct:"-0.16%",up:false},{name:"S&P 500",value:"7,165",pct:"+0.80%",up:true},{name:"NASDAQ",value:"24,836",pct:"+1.63%",up:true}],news:[{cat:"💻 Intel",title:"Intel+23%急騰、2000年の最高値を26年ぶりに更新",impact:"高",dir:"ポジティブ",detail:"Intelが強い2Q見通しと1Q利益で市場予想を大幅に上回りS&P500最高パフォーマー。AI CapExへの懸念が払拭されSOXが18連騰を記録。",src:"Yahoo Finance"},{cat:"🤖 Nvidia",title:"NvidiaがS&P500史上初の時価総額5兆ドルを回復",impact:"高",dir:"ポジティブ",detail:"Nvidiaが終値ベースで時価総額5兆ドルを回復、Appleを抜き単独首位。AI半導体需要の底堅さを改めて確認。",src:"CNBC"},{cat:"🕊 和平",title:"イラン外相がパキスタン入り、交渉再開へ期待",impact:"高",dir:"ポジティブ",detail:"イランの外相がイスラマバード入りし、ウィットコフ・クシュナーも土曜に現地入り。和平再交渉への期待が高まりリスクオン優勢。",src:"Reuters"},{cat:"🏛 FRB",title:"FRBのパウエル刑事捜査が終結、ウォーシュ後任へ",impact:"中",dir:"ポジティブ",detail:"司法省がパウエルFRB議長への刑事捜査終結を発表。トランプ指名のケビン・ウォーシュ承認への道が開けた。市場に安心感。",src:"WSJ"},{cat:"📊 決算",title:"消費者信頼感が過去最低水準、内需懸念が残る",impact:"中",dir:"ネガティブ",detail:"ミシガン大消費者信頼感が49.8と過去最低水準。中東停戦でやや回復も構造的な消費者マインドの悪化が続く。",src:"Reuters"}],watch:"週末のイスラマバード交渉→月曜相場が決まる。合意→大幅上昇継続。決裂→リスクオフ急転。来週のFOMC（4/29）でウォーシュ後任への言及があるか。決算はApple・Amazon・Meta・Microsoftが控える。",stocks:[{name:"Intel",code:"INTC",value:"$82.57",pct:"+23.65%",up:true,note:"半導体。26年ぶり最高値更新。AI CapEx懸念払拭で大逆転"},{name:"Nvidia",code:"NVDA",value:"$178.40",pct:"+4.30%",up:true,note:"AI半導体。時価総額5兆ドル回復・記録更新中"},{name:"Tesla",code:"TSLA",value:"$322.10",pct:"+0.69%",up:true,note:"EV。1Q決算は売上高が弱め、今後の展開に注目"}]};
+const FUNDS={date:"2026年4月14日（月）",summary:"和平期待で全ファンドが急回復、S&P500連動は最高値圏",direction:"上昇",confidence:"高",news:[{cat:"📈 米国株",title:"S&P500連動ファンド、7,000突破で最高値圏",impact:"高",dir:"ポジティブ",detail:"eMAXIS Slim S&P500は米国株最高値更新を受け基準価額も急回復。4月初旬の関税ショックからV字回復が鮮明。",src:"みんかぶ"},{cat:"🤖 FANG+",title:"FANG+、ソフトウェア復活でV字回復",impact:"高",dir:"ポジティブ",detail:"AI代替懸念で急落していたFANG+がソフトウェア株急回復で大幅高。NASDAQの12連騰が追い風。",src:"みんかぶ"},{cat:"🌐 全世界",title:"オルカン、米国主導で最高値更新ペース",impact:"中",dir:"ポジティブ",detail:"全世界株式（オルカン）は米国株高と円高の相殺で推移。長期保有前提なら継続が基本。",src:"みんかぶ"},{cat:"🏦 高配当",title:"SBI日本高配当株、日経最高値更新で続伸",impact:"中",dir:"ポジティブ",detail:"日経59,000台乗せで高配当株にも買い。金利上昇局面でバリュー株への資金流入が継続。",src:"みんかぶ"},{cat:"📊 債券",title:"先進国債券、金利落ち着きで反発",impact:"中",dir:"ポジティブ",detail:"WTI下落でインフレ懸念が後退し長期金利が低下。債券価格が反発し先進国債券ファンドが回復。",src:"みんかぶ"}],watch:"和平正式合意なら株式ファンド全般が一段高へ。S&P500・NASDAQ連動は最高値追い。債券も金利低下で回復基調。4月末の日銀会合後の動向も要注目。",list:[{name:"eMAXIS Slim 米国株式（S&P500）",nav:"45,200円",pct:"+1.20%",up:true},{name:"eMAXIS Slim 全世界株式（オルカン）",nav:"38,400円",pct:"+0.90%",up:true},{name:"eMAXIS Slim 先進国債券インデックス",nav:"16,100円",pct:"+0.30%",up:true},{name:"eMAXIS Slim 先進国リートインデックス",nav:"18,200円",pct:"+0.80%",up:true},{name:"eMAXIS Slim 国内リートインデックス",nav:"11,400円",pct:"+0.50%",up:true},{name:"eMAXIS NASDAQ100インデックス",nav:"36,800円",pct:"+1.80%",up:true},{name:"iFreeNEXT FANG+インデックス",nav:"92,400円",pct:"+2.10%",up:true},{name:"SBI日本高配当株式ファンド",nav:"17,800円",pct:"+0.60%",up:true},{name:"SBI・V・米国高配当株式F",nav:"15,600円",pct:"+0.80%",up:true},{name:"SBI・S・米国高配当株式F",nav:"12,900円",pct:"+0.70%",up:true},{name:"WCM 世界成長株厳選ファンド",nav:"24,500円",pct:"+1.40%",up:true}]};
+const RE={date:"2026年4月17日時点",summary:"都心は踊り場継続、城東・城北が上昇",direction:"上昇",confidence:"中",news:[{cat:"🏙 市況",title:"都心5区で値下げ圧力継続",impact:"高",dir:"ネガティブ",detail:"2026年Q1の都心5区値下げ率6.24%と2023年以降最大。湾岸エリアを中心に踊り場が続く。",src:"マンションリサーチ"},{cat:"📈 市況",title:"城東・城北エリアが上昇継続、4%台の利回り維持",impact:"高",dir:"ポジティブ",detail:"江東・足立・板橋・練馬エリアが価格上昇中。都心比割安感で実需・投資需要が流入。表面利回り4%前後を維持。",src:"東日本不動産流通機構"},{cat:"🏦 金利",title:"変動金利1%超え継続、日銀4月会合（4/27）に注目",impact:"高",dir:"ネガティブ",detail:"大手5行すべてが変動金利1%超え。日銀4月会合での追加利上げ判断が今後の金利動向を左右。",src:"モゲチェック"},{cat:"🏦 金利",title:"フラット35が2.49%で高止まり",impact:"中",dir:"ネガティブ",detail:"長期金利が2.3%台で高止まり。原油安・和平進展で若干の低下余地も。投資用物件は1.5〜4%の投資ローンが適用。",src:"住宅金融支援機構"},{cat:"📊 需給",title:"実需層が主役、投資家は様子見継続",impact:"中",dir:"中立",detail:"政府の価格高騰抑制方針を受け国内外の投資家が様子見。実需層中心の市場が継続。",src:"Bloomberg"}],watch:"都心踊り場・城東城北上昇の二極化が継続。日銀4月会合（4/27-28）での利上げ判断が今後の金利・不動産市場の分岐点になる。",rates:[{area:"都心3区（千代田・中央・港）",price:"1億円超",yield:"約2.8%",trend:"↔ 踊り場",note:"海外マネー流入で高値圏。イールドスプレッド縮小で投資妙味は低下。"},{area:"城西（渋谷・新宿・中野・杉並）",price:"7,000〜9,000万円",yield:"約3.2%",trend:"↔ 横ばい",note:"根強い実需。共働き世帯に人気。中野区は再開発で注目。"},{area:"城南（品川・目黒・世田谷・大田）",price:"6,000〜8,000万円",yield:"約3.5%",trend:"↑ 上昇",note:"交通利便性が高く安定需要。品川・大田区は再開発効果。"},{area:"城東（江東・墨田・足立・葛飾）",price:"4,000〜6,000万円",yield:"約4.2%",trend:"↑↑ 急上昇",note:"利回り妙味あり。湾岸エリアは踊り場だが内陸部は堅調。投資向き。"},{area:"城北（文京・豊島・板橋・練馬）",price:"4,500〜6,500万円",yield:"約3.8%",trend:"↑ 上昇",note:"文教地区で実需強し。板橋・練馬は都心比割安で上昇余地あり。"}],loans:[{type:"変動金利（住宅ローン）",rate:"0.6〜1.0%",note:"自己居住用のみ適用。2026年4月から15年ぶり1%超え。日銀4月会合次第でさらに上昇の可能性。"},{type:"固定金利・フラット35",rate:"約2.49%",note:"自己居住用のみ適用。長期金利高止まりで高水準継続。金利確定のメリットあり。"},{type:"投資用不動産ローン",rate:"1.5〜4.0%",note:"収益物件向け。金融機関により差大。属性・物件評価で金利が変わる。"}]};
+
+const CU="#4ecdc4",CD="#ff6b6b";
+const BACKNUMBERS=[
+  {date:"4/24（金）",summary:"日経59,716円最高値更新、SOX18連騰・Intel+23%",nikkei:"59,716",usdjpy:"159.30",wti:"$94.4",dir:"上昇"},
+  {date:"4/17（木）",summary:"日経最高値59,518円超え、6万円が射程圏内",nikkei:"59,549",usdjpy:"159.24",wti:"$93",dir:"上昇"},
+  {date:"4/16（水）",summary:"S&P500が7,000の大台突破、NASDAQ12連騰",nikkei:"59,518",usdjpy:"159.45",wti:"$93",dir:"上昇"},
+  {date:"4/14（月）",summary:"和平期待で日経が関税前の水準を完全回復",nikkei:"58,144",usdjpy:"159.20",wti:"$97",dir:"上昇"},
+  {date:"4/7（月）",summary:"停戦交渉報道で反発、鬼門の月曜日を乗り越えた",nikkei:"53,413",usdjpy:"159.58",wti:"$111.8",dir:"上昇"},
+  {date:"4/5（日）",summary:"WTI $112超、160円の壁が焦点",nikkei:"53,123",usdjpy:"159.62",wti:"$112",dir:"円安"},
+  {date:"4/2（木）",summary:"トランプ演説失望でハイテク急落",nikkei:"52,463",usdjpy:"159.20",wti:"$109",dir:"下落"},
 ];
+function dirCol(d){return d==="上昇"||d==="円安"?"#4ecdc4":d==="下落"||d==="円高"?"#ff6b6b":"#888"}
+function dirArrow(d){return d==="上昇"||d==="円安"?"↑":d==="下落"||d==="円高"?"↓":"→"}
+function initBN(){
+  const list=document.getElementById("bn-list");
+  if(!list)return;
+  list.innerHTML=BACKNUMBERS.map((b,i)=>`<div style="display:flex;align-items:center;padding:7px 10px;border-bottom:${i<BACKNUMBERS.length-1?"1px solid rgba(255,255,255,0.04)":"none"};gap:6px"><span style="font-size:9px;color:#444;min-width:56px">${b.date}</span><span style="font-size:9px;color:#555;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><span style="color:${dirCol(b.dir)};margin-right:4px">${dirArrow(b.dir)}</span>${b.summary}</span><span style="font-size:9px;color:#4ecdc4;min-width:44px;text-align:right;font-weight:700">${b.nikkei}</span><span style="font-size:9px;color:#888;min-width:42px;text-align:right">${b.usdjpy}</span><span style="font-size:9px;color:#ffaa00;min-width:32px;text-align:right">${b.wti}</span></div>`).join("");
+}
+document.addEventListener("DOMContentLoaded",initBN);
+function toggleBN(btn){
+  const body=document.getElementById("bn-body");
+  const open=body.style.display==="none";
+  body.style.display=open?"block":"none";
+  btn.textContent=`📁 バックナンバー（過去1週間） ${open?"▲":"▼"}`;
+}
+function upc(b){return b?CU:CD}
+function ic(v){return v==="高"?"#ff4444":v==="中"?"#ffaa00":"#44bb88"}
+function dc(d){if(d.includes("ポジティブ")||d.includes("円安要因")||d.includes("上昇"))return CU;if(d.includes("ネガティブ")||d.includes("円高要因")||d.includes("下落"))return CD;return"#888"}
+function da(d){if(d.includes("ポジティブ")||d.includes("円安要因")||d.includes("上昇"))return"↑";if(d.includes("ネガティブ")||d.includes("円高要因")||d.includes("下落"))return"↓";return"→"}
+function sc(dir){return dir==="上昇"||dir==="円安"?CU:dir==="下落"||dir==="円高"?CD:"#888"}
+function sa(dir){return dir==="上昇"||dir==="円安"?"↑":dir==="下落"||dir==="円高"?"↓":"→"}
 
-const DEFAULT_MENUS = [
-  {key:'cut',   label:'カット',      color:'#4a6e8a', price:5000},
-  {key:'color', label:'カラー',      color:'#9a7e5a', price:9000},
-  {key:'perm',  label:'パーマ',      color:'#7a70a0', price:12000},
-  {key:'tr',    label:'トリートメント', color:'#4e8a68', price:6000},
-  {key:'perm2', label:'縮毛矯正',    color:'#a04848', price:18000},
-  {key:'spa',   label:'ヘッドスパ',  color:'#6a607a', price:4000},
-];
+function rSummary(d){return`<div class="summary-card"><div class="card-lbl">TODAY'S BRIEF</div><div class="card-title">${d.summary}</div><div class="tags"><span class="tag-dir" style="color:${sc(d.direction)}">${sa(d.direction)} ${d.direction}</span><span class="tag-conf">確度: ${d.confidence}</span></div></div>`}
+function rNews(news){return news.map(n=>{const imp=ic(n.impact);return`<div class="news-item" style="border-left:3px solid ${imp}"><div class="news-hdr"><div class="news-meta"><span class="news-cat">${n.cat}</span><span class="imp-badge" style="background:${imp}22;color:${imp};border:1px solid ${imp}44">影響${n.impact}</span></div><span class="news-dir" style="color:${dc(n.dir)}">${da(n.dir)} ${n.dir}</span></div><div class="news-title">${n.title}</div><div class="news-detail">${n.detail}</div><span class="news-src">🔗 ${n.src}</span></div>`}).join("")}
+function rWatch(w){return`<div class="watch-card"><div class="watch-lbl">⚠ TODAY'S WATCH</div><div class="watch-txt">${w}</div></div>`}
+function rIdx(idx){return`<div class="idx-cards">${idx.map(x=>`<div class="idx-card"><div class="idx-name">${x.name}</div><div class="idx-val">${x.value}</div><div class="idx-pct" style="color:${upc(x.up)}">${x.up?"▲":"▼"} ${x.pct}</div></div>`).join("")}</div>`}
+function rStocks(stocks){return`<div class="plain">${stocks.map(s=>`<div class="stock-row"><div class="stock-main"><div><div class="stock-name">${s.name}</div><div class="stock-code">${s.code}</div></div><div><div class="stock-val">${s.value}</div><div class="stock-pct" style="color:${upc(s.up)}">${s.up?"▲":"▼"} ${s.pct} <span style="font-size:8px;color:#444">前日比</span></div></div></div>${s.note?`<div class="stock-note">${s.note}</div>`:""}</div>`).join("")}</div>`}
 
-const MONTHS = [
-  {key:'2025-01',label:'2025年1月',days:31},
-  {key:'2025-02',label:'2025年2月',days:28},
-  {key:'2025-03',label:'2025年3月',days:31},
-  {key:'2025-04',label:'2025年4月',days:30},
-  {key:'2025-05',label:'2025年5月',days:31},
-];
-
-// ══ 状態 ══
-let currentMonth = (() => {
-  const d = new Date();
-  const k = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-  return MONTHS.find(m=>m.key===k) ? k : '2025-04';
-})();
-let currentIdx = 0;
-
-// ══ メニュー取得 ══
-function getMenus() {
-  const raw = localStorage.getItem('tring_menus');
-  return raw ? JSON.parse(raw) : DEFAULT_MENUS;
+let curPair="USD/JPY";
+function renderFX(){
+  const r=FX.rates[curPair];const cu=(r.change||"").startsWith("+");
+  const pb=Object.keys(FX.rates).map(p=>`<button class="pair-btn${p===curPair?" on":""}" onclick="selPair('${p}',this)">${p}</button>`).join("");
+  return rSummary(FX)+`<div class="pair-tabs">${pb}</div><div class="plain" id="rc"><div class="rate-row"><div><div class="rate-lbl">Bid / Ask</div><div class="rate-val">${r.bid} <span class="rate-ask">/ ${r.ask}</span></div></div><div style="text-align:right"><div class="rate-lbl">前日比</div><div class="rate-chg" style="color:${cu?CU:CD}">${cu?"▲":"▼"} ${r.change}</div></div></div><div class="rate-foot"><span>レンジ: ${r.range}</span><span>${r.bias}</span></div></div><div class="sec-lbl">MARKET MOVERS</div>`+rNews(FX.news)+rWatch(FX.watch)
+}
+function rPolicy(policy){return`<div class="plain">${policy.map((p,i)=>{const col=p.impact==="ポジティブ"?CU:p.impact==="ネガティブ"?CD:"#888";return`<div style="padding:9px 0;border-bottom:${i<policy.length-1?"1px solid rgba(255,255,255,0.05)":"none"}"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span style="font-size:11px;font-weight:700">${p.theme}</span><span style="font-size:9px;padding:2px 7px;background:${col}22;color:${col};border:1px solid ${col}44;border-radius:2px">${p.impact}</span></div><div style="font-size:10px;color:#555;line-height:1.5">${p.detail}</div></div>`}).join("")}</div>`}
+function renderJP(){return rSummary(JP)+rIdx(JP.indices)+`<div class="sec-lbl">MARKET MOVERS</div>`+rNews(JP.news)+rWatch(JP.watch)+`<div class="sec-lbl">政策動向</div><div style="padding:6px 10px;background:rgba(100,100,255,0.04);border:1px solid rgba(100,100,255,0.12);border-radius:4px;margin-bottom:8px;font-size:9px;color:#555">📋 内閣府「経済財政運営と改革の基本方針2025」（骨太方針）より</div>`+rPolicy(JP.policy)+`<div class="sec-lbl">注目銘柄</div>`+rStocks(JP.stocks)}
+function renderUS(){return rSummary(US)+rIdx(US.indices)+`<div class="sec-lbl">MARKET MOVERS</div>`+rNews(US.news)+rWatch(US.watch)+`<div class="sec-lbl">注目銘柄</div>`+rStocks(US.stocks)}
+function renderFunds(){
+  const fl=FUNDS.list.map(f=>`<div class="fund-row"><div style="flex:1;padding-right:8px"><div class="fund-name">${f.name}</div><div class="fund-nav">基準価額 ${f.nav}</div></div><div class="fund-gain" style="color:${f.pct==="---"?"#444":upc(f.up)}">${f.pct==="---"?"---":`${f.up?"▲":"▼"} ${f.pct}`} <span style="font-size:8px;color:#444">${f.pct==="---"?"":"前日比"}</span></div></div>`).join("");
+  return rSummary(FUNDS)+`<div class="sec-lbl">MARKET MOVERS</div>`+rNews(FUNDS.news)+rWatch(FUNDS.watch)+`<div class="sec-lbl">注目ファンド</div><div style="padding:8px 10px;background:rgba(255,170,0,0.05);border:1px solid rgba(255,170,0,0.15);border-radius:4px;margin-bottom:8px;font-size:10px;color:#888">⚠ 基準価額は <span style="color:#ffaa00;font-weight:700">${FUNDS.date}時点</span>。毎週月曜に更新。</div><div class="plain">${fl}</div>`
+}
+function renderRE(){
+  const rates=RE.rates.map((r,i)=>`<div style="padding:10px 0;border-bottom:${i<RE.rates.length-1?"1px solid rgba(255,255,255,0.05)":"none"}"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span style="font-size:11px;font-weight:700">${r.area}</span><span style="font-size:10px;color:${r.trend.includes("↑↑")?"#ff6b6b":r.trend.includes("↑")?"#4ecdc4":"#888"};font-weight:700">${r.trend}</span></div><div style="display:flex;gap:12px;margin-bottom:4px"><span style="font-size:10px;color:#555">相場 <span style="color:#e8e8f0;font-weight:700">${r.price}</span></span><span style="font-size:10px;color:#555">表面利回り <span style="color:#00ffb4;font-weight:700">${r.yield}</span></span></div><div style="font-size:10px;color:#555;line-height:1.4">${r.note}</div></div>`).join("");
+  const loans=RE.loans.map((l,i)=>`<div style="padding:9px 0;border-bottom:${i<RE.loans.length-1?"1px solid rgba(255,255,255,0.05)":"none"}"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px"><span style="font-size:11px;font-weight:700">${l.type}</span><span style="font-size:12px;color:#ffaa00;font-weight:700">${l.rate}</span></div><div style="font-size:10px;color:#555;line-height:1.4">${l.note}</div></div>`).join("");
+  return rSummary(RE)+`<div class="sec-lbl">MARKET MOVERS</div>`+rNews(RE.news)+rWatch(RE.watch)+`<div class="sec-lbl">エリア別相場・利回り</div><div style="padding:6px 10px;background:rgba(100,100,255,0.04);border:1px solid rgba(100,100,255,0.12);border-radius:4px;margin-bottom:8px;font-size:9px;color:#555">📋 東日本不動産流通機構データ（2026年Q1）・70㎡換算目安</div><div class="plain">${rates}</div><div class="sec-lbl">金利動向</div><div class="plain">${loans}</div>`
 }
 
-// ══ データ集計 ══
-function dayKey(month, day, sid) {
-  return `tring_d_${month}_${String(day).padStart(2,'0')}_${sid}`;
-}
-function getStaffDay(month, day, sid) {
-  const raw = localStorage.getItem(dayKey(month, day, sid));
-  if (raw) return JSON.parse(raw);
-  return null;
-}
-
-function getMonthData(month) {
-  const menus = getMenus();
-  const mo    = MONTHS.find(m => m.key === month);
-  if (!mo) return null;
-
-  // スタッフ別に全日集計
-  const staffData = STAFF.map(s => {
-    const menuCounts = Object.fromEntries(menus.map(m => [m.key, 0]));
-    let hasData = false;
-    for (let d = 1; d <= mo.days; d++) {
-      const day = getStaffDay(month, d, s.id);
-      if (day) {
-        hasData = true;
-        menus.forEach(m => { menuCounts[m.key] += (day[m.key] || 0); });
-      }
+const renders={fx:renderFX,jp:renderJP,us:renderUS,funds:renderFunds,re:renderRE};
+function showPanel(id){
+  const btn=document.getElementById("btn-"+id);
+  const content=document.getElementById("content-"+id);
+  const empty=document.getElementById("empty-"+id);
+  btn.disabled=true;btn.textContent="⟳ 取得中...";
+  setTimeout(()=>{
+    try{
+      content.innerHTML=renders[id]();
+      content.style.display="block";
+      empty.style.display="none";
+    }catch(e){
+      content.innerHTML=`<div style="color:#ff6b6b;padding:12px;font-size:10px">エラー: ${e.message}</div>`;
+      content.style.display="block";
+      empty.style.display="none";
     }
-    const totalCnt   = menus.reduce((a,m) => a + menuCounts[m.key], 0);
-    const totalSales = menus.reduce((a,m) => a + menuCounts[m.key] * m.price, 0);
-    return { ...s, menuCounts, totalCnt, totalSales, hasData };
-  });
-
-  const hasAnyData = staffData.some(s => s.hasData);
-  if (!hasAnyData) return null;
-
-  // 全体集計
-  const menuTotals = Object.fromEntries(menus.map(m => [m.key, {cnt:0, sales:0}]));
-  let totalSales = 0, totalCnt = 0;
-  staffData.forEach(s => {
-    menus.forEach(m => {
-      menuTotals[m.key].cnt   += s.menuCounts[m.key];
-      menuTotals[m.key].sales += s.menuCounts[m.key] * m.price;
-    });
-    totalSales += s.totalSales;
-    totalCnt   += s.totalCnt;
-  });
-
-  // 前月データ
-  const prevIdx  = MONTHS.findIndex(m => m.key === month) - 1;
-  const prevMonth = prevIdx >= 0 ? MONTHS[prevIdx].key : null;
-  const prevData  = prevMonth ? getMonthData(prevMonth) : null;
-
-  return { menus, staffData, menuTotals, totalSales, totalCnt, prevData };
+    btn.disabled=false;btn.textContent="↺ 再表示";
+  },700);
 }
-
-// ══ フォーマット ══
-function yen(n) { return n.toLocaleString('ja-JP') + '円'; }
-function badge(cur, prev) {
-  if (!prev || prev === 0) return '';
-  const diff = ((cur - prev) / prev * 100).toFixed(1);
-  const up   = cur >= prev;
-  return `<div class="kpi-badge ${up?'up':'down'}">前月比 ${up?'▲':'▼'} ${Math.abs(diff)}%</div>`;
+const tabIds=["fx","jp","us","funds","re"];
+function switchTab(id,el){
+  document.querySelectorAll(".panel").forEach(p=>p.classList.remove("on"));
+  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("on"));
+  document.getElementById("panel-"+id).classList.add("on");
+  document.querySelector(`.tab[onclick*="'${id}'"]`).classList.add("on");
 }
-
-// ══ レンダリング ══
-function renderAll() {
-  document.getElementById('monthBadgeText').textContent =
-    MONTHS.find(m => m.key === currentMonth)?.label || currentMonth;
-
-  const d = getMonthData(currentMonth);
-
-  if (!d) { renderNoData(); return; }
-
-  const { menus, staffData, menuTotals, totalSales, totalCnt, prevData } = d;
-  const avgPrice = totalCnt ? Math.round(totalSales / totalCnt) : 0;
-  const totalMenuCnt = totalCnt;
-
-  // ── KPI ──
-  document.getElementById('kpi-sales').textContent = yen(totalSales);
-  document.getElementById('kpi-sales-badge').outerHTML =
-    `<div id="kpi-sales-badge">${badge(totalSales, prevData?.totalSales)}</div>`;
-  document.getElementById('kpi-sales-detail').innerHTML = prevData
-    ? `<div class="kpi-detail-row"><span class="kpi-detail-name">先月</span><span class="kpi-detail-val">${yen(prevData.totalSales)}</span></div>`
-    : '<div class="kpi-detail-row"><span class="kpi-detail-name">先月データなし</span></div>';
-
-  document.getElementById('kpi-clients').textContent = totalCnt + '名';
-  document.getElementById('kpi-clients-badge').outerHTML =
-    `<div id="kpi-clients-badge">${badge(totalCnt, prevData?.totalCnt)}</div>`;
-  document.getElementById('kpi-clients-detail').innerHTML = `
-    <div class="kpi-detail-row"><span class="kpi-detail-name">スタッフ数</span><span class="kpi-detail-val">${staffData.filter(s=>s.hasData).length}名</span></div>`;
-
-  document.getElementById('kpi-avg').textContent = avgPrice ? yen(avgPrice) : '—';
-  const prevAvg = prevData?.totalCnt ? Math.round(prevData.totalSales / prevData.totalCnt) : 0;
-  document.getElementById('kpi-avg-badge').outerHTML =
-    `<div id="kpi-avg-badge">${prevAvg ? badge(avgPrice, prevAvg) : ''}</div>`;
-  document.getElementById('kpi-avg-detail').innerHTML = prevAvg
-    ? `<div class="kpi-detail-row"><span class="kpi-detail-name">先月</span><span class="kpi-detail-val">${yen(prevAvg)}</span></div>`
-    : '';
-
-  document.getElementById('kpi-menu').textContent = totalMenuCnt + '件';
-  document.getElementById('kpi-menu-badge').outerHTML =
-    `<div id="kpi-menu-badge">${badge(totalMenuCnt, prevData?.totalCnt)}</div>`;
-  document.getElementById('kpi-menu-detail').innerHTML = menus.map(m =>
-    `<div class="kpi-detail-row"><span class="kpi-detail-name">${m.label}</span><span class="kpi-detail-val">${menuTotals[m.key].cnt}件</span></div>`
-  ).join('');
-
-  // ── Donut ──
-  const circ = 2 * Math.PI * 38;
-  let off = 0;
-  const circles = menus.map(m => {
-    const pct  = totalSales ? menuTotals[m.key].sales / totalSales : 0;
-    const dash = (pct * circ).toFixed(2);
-    const gap  = (circ - dash).toFixed(2);
-    const c = `<circle cx="55" cy="55" r="38" fill="none" stroke="${m.color}" stroke-width="18"
-      stroke-dasharray="${dash} ${gap}" stroke-dashoffset="${-off}" transform="rotate(-90 55 55)" opacity=".85"/>`;
-    off += parseFloat(dash);
-    return c;
-  }).join('');
-  document.getElementById('donutSvg').innerHTML = circles +
-    `<circle cx="55" cy="55" r="29" fill="white"/>
-     <text x="55" y="52" text-anchor="middle" fill="#2a2825" font-size="12" font-family="Meiryo" font-weight="500">${totalCnt}</text>
-     <text x="55" y="63" text-anchor="middle" fill="#888078" font-size="9" font-family="Meiryo">件</text>`;
-  document.getElementById('donutLegend').innerHTML = menus.map(m => {
-    const pct = totalSales ? Math.round(menuTotals[m.key].sales / totalSales * 100) : 0;
-    return `<div class="legend-item">
-      <div class="legend-dot" style="background:${m.color}"></div>
-      <div class="legend-name">${m.label}</div>
-      <div class="legend-pct">${pct}%</div>
-    </div>`;
-  }).join('');
-
-  // ── Staff list ──
-  const sorted = [...staffData].filter(s => s.hasData).sort((a,b) => b.totalSales - a.totalSales);
-  document.getElementById('staffList').innerHTML = sorted.length ? sorted.map((s,i) => {
-    const rank = i+1;
-    const rc = rank===1?'rank-1':rank===2?'rank-2':rank===3?'rank-3':'';
-    const bars = menus.map(m => {
-      const pct = s.totalSales ? Math.round(s.menuCounts[m.key]*m.price/s.totalSales*100) : 0;
-      return `<div class="bar-row">
-        <div class="bar-label">${m.label}</div>
-        <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${m.color}"></div></div>
-        <div class="bar-val">${pct}%</div>
-      </div>`;
-    }).join('');
-    return `<div class="staff-card" onclick="this.classList.toggle('expanded')">
-      <div class="staff-header">
-        <div class="avatar" style="background:${s.bg};color:${s.tc}">${s.ini}</div>
-        <div class="staff-info">
-          <div class="staff-name">${s.name} <span class="rank ${rc}">${rank}</span></div>
-          <div class="staff-role">${s.role}</div>
-        </div>
-        <div class="staff-right">
-          <div class="staff-sales-val">${yen(s.totalSales)}</div>
-          <div class="staff-sales-cnt">${s.totalCnt}件</div>
-        </div>
-        <div class="chevron">▾</div>
-      </div>
-      <div class="breakdown">${bars}</div>
-    </div>`;
-  }).join('') : `<div class="no-data"><div class="no-data-icon">👥</div><div class="no-data-text">スタッフデータがありません</div></div>`;
-
-  // ── Service grid ──
-  document.getElementById('serviceGrid').innerHTML = menus.map(m => {
-    const pct = totalSales ? Math.round(menuTotals[m.key].sales / totalSales * 100) : 0;
-    return `<div class="service-card">
-      <div class="service-name">${m.label}</div>
-      <div class="service-pct" style="color:${m.color}">${pct}<span>%</span></div>
-      <div class="service-cnt">${menuTotals[m.key].cnt}件<br>${yen(menuTotals[m.key].sales)}</div>
-    </div>`;
-  }).join('');
-
-  // ── Staff×Menu breakdown ──
-  const sb = document.getElementById('staffMenuBreakdown');
-  sb.innerHTML = sorted.map((s,i) => `
-    <div>
-      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px;">
-        <span style="font-size:12px;font-weight:500;color:var(--ink)">${s.name}</span>
-        <span style="font-size:10px;color:var(--muted)">${yen(s.totalSales)}</span>
-      </div>
-      <div style="display:flex;gap:2px;height:6px;border-radius:3px;overflow:hidden;margin-bottom:5px;">
-        ${menus.map(m => {
-          const pct = s.totalSales ? Math.round(s.menuCounts[m.key]*m.price/s.totalSales*100) : 0;
-          return `<div style="width:${pct}%;background:${m.color}"></div>`;
-        }).join('')}
-      </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        ${menus.map(m => {
-          const pct = s.totalSales ? Math.round(s.menuCounts[m.key]*m.price/s.totalSales*100) : 0;
-          return `<span style="font-size:9px;color:${m.color}">${m.label} ${pct}%</span>`;
-        }).join('')}
-      </div>
-      ${i < sorted.length-1 ? '<div class="divider"></div>' : ''}
-    </div>`).join('');
-}
-
-function renderNoData() {
-  const noDataHtml = `<div class="no-data">
-    <div class="no-data-icon">📊</div>
-    <div class="no-data-text">まだデータがありません<br>管理画面から入力してください</div>
-  </div>`;
-  document.getElementById('kpi-sales').textContent = '—';
-  document.getElementById('kpi-clients').textContent = '—';
-  document.getElementById('kpi-avg').textContent = '—';
-  document.getElementById('kpi-menu').textContent = '—';
-  ['kpi-sales-badge','kpi-clients-badge','kpi-avg-badge','kpi-menu-badge'].forEach(id => {
-    document.getElementById(id).innerHTML = '';
-  });
-  document.getElementById('donutSvg').innerHTML =
-    `<circle cx="55" cy="55" r="38" fill="none" stroke="#e8e4de" stroke-width="18"/>
-     <circle cx="55" cy="55" r="29" fill="white"/>
-     <text x="55" y="59" text-anchor="middle" fill="#b0a89e" font-size="10" font-family="Meiryo">未入力</text>`;
-  document.getElementById('donutLegend').innerHTML = '';
-  document.getElementById('staffList').innerHTML = noDataHtml;
-  document.getElementById('serviceGrid').innerHTML = '';
-  document.getElementById('staffMenuBreakdown').innerHTML = '';
-}
-
-// ══ 月ピッカー ══
-function openMonthPicker() {
-  const p = document.getElementById('monthPicker');
-  p.querySelectorAll('.month-option').forEach(e => e.remove());
-  [...MONTHS].reverse().forEach(m => {
-    const opt = document.createElement('div');
-    opt.className = 'month-option' + (m.key===currentMonth?' selected':'');
-    opt.innerHTML = `<div><div class="month-option-label">${m.label}</div></div><div class="month-check">✓</div>`;
-    opt.addEventListener('click', () => {
-      currentMonth = m.key;
-      document.getElementById('monthOverlay').classList.remove('open');
-      renderAll();
-    });
-    p.appendChild(opt);
-  });
-  document.getElementById('monthOverlay').classList.add('open');
-}
-function closeMonthPicker(e) {
-  if (e.target === document.getElementById('monthOverlay'))
-    document.getElementById('monthOverlay').classList.remove('open');
-}
-
-// ══ スライド ══
-const track = document.getElementById('slidesTrack');
-function goTo(idx, animate=true) {
-  track.style.transition = animate ? 'transform .32s cubic-bezier(.4,0,.2,1)' : 'none';
-  currentIdx = idx;
-  track.style.transform = `translateX(${-idx*(100/3)}%)`;
-  document.querySelectorAll('.nav-item').forEach((n,i) => n.classList.toggle('active', i===idx));
-  document.querySelectorAll('.kpi-card.expanded').forEach(c => c.classList.remove('expanded'));
-}
-
-// スワイプ
-let txStart=0, tyStart=0, txDelta=0, swState='idle';
-const vp = document.getElementById('viewport');
-vp.addEventListener('touchstart', e => {
-  const m = new WebKitCSSMatrix(getComputedStyle(track).transform);
-  track.style.transition = 'none';
-  track.style.transform  = `translateX(${m.m41}px)`;
-  txStart=e.touches[0].clientX; tyStart=e.touches[0].clientY; txDelta=0; swState='idle';
-},{passive:true});
-vp.addEventListener('touchmove', e => {
-  const dx=e.touches[0].clientX-txStart, dy=e.touches[0].clientY-tyStart;
-  if (swState==='idle'){ if(Math.abs(dx)<6&&Math.abs(dy)<6)return; swState=Math.abs(dx)>=Math.abs(dy)?'h':'v'; }
-  if (swState==='v') return; e.preventDefault(); txDelta=dx;
-  let off=dx;
-  if ((currentIdx===0&&dx>0)||(currentIdx===2&&dx<0)) off=dx*.25;
-  track.style.transform=`translateX(calc(${-currentIdx*(100/3)}% + ${off}px))`;
-},{passive:false});
-function finishSwipe(){
-  if (swState!=='h'){swState='idle';return;} swState='idle';
-  const th=window.innerWidth*.2; let next=currentIdx;
-  if (txDelta<-th&&currentIdx<2) next=currentIdx+1;
-  else if (txDelta>th&&currentIdx>0) next=currentIdx-1;
-  track.style.transition='transform .32s cubic-bezier(.4,0,.2,1)';
-  currentIdx=next; track.style.transform=`translateX(${-next*(100/3)}%)`;
-  document.querySelectorAll('.nav-item').forEach((n,i)=>n.classList.toggle('active',i===next));
-  document.querySelectorAll('.kpi-card.expanded').forEach(c=>c.classList.remove('expanded'));
-}
-vp.addEventListener('touchend', finishSwipe);
-vp.addEventListener('touchcancel', finishSwipe);
-
-function toggleKpi(c){ c.classList.toggle('expanded'); }
-
-// ── viewport高さをヘッダーに合わせる ──
-function adjustViewport(){
-  document.getElementById('viewport').style.top = document.querySelector('.header').getBoundingClientRect().height + 'px';
-}
-adjustViewport();
-window.addEventListener('resize', adjustViewport);
-
-// ── localStorage変更を監視して自動更新 ──
-window.addEventListener('storage', e => {
-  if (e.key && e.key.startsWith('tring_')) renderAll();
+function curTab(){return tabIds.find(id=>document.getElementById("panel-"+id).classList.contains("on"))||"fx"}
+let _tx=null;
+document.addEventListener("touchstart",e=>{_tx=e.touches[0].clientX},{passive:true});
+document.addEventListener("touchend",e=>{
+  if(_tx===null)return;
+  const diff=_tx-e.changedTouches[0].clientX;
+  if(Math.abs(diff)<50){_tx=null;return;}
+  const cur=tabIds.indexOf(curTab());
+  if(diff>0&&cur<tabIds.length-1)switchTab(tabIds[cur+1],null);
+  if(diff<0&&cur>0)switchTab(tabIds[cur-1],null);
+  _tx=null;
 });
-
-// ── Init ──
-
-// ── ダミーデータ初期化（データが何もない場合のみ） ──
-if (!localStorage.getItem('tring_menus')) {
-// T ring ダミーデータ
-localStorage.clear();
-localStorage.setItem('tring_menus', JSON.stringify([{"key": "cut", "label": "\u30ab\u30c3\u30c8", "color": "#4a6e8a", "price": 6500}, {"key": "color", "label": "\u30ab\u30e9\u30fc", "color": "#9a7e5a", "price": 12000}, {"key": "perm", "label": "\u30d1\u30fc\u30de", "color": "#7a70a0", "price": 15000}, {"key": "tr", "label": "\u30c8\u30ea\u30fc\u30c8\u30e1\u30f3\u30c8", "color": "#4e8a68", "price": 8000}, {"key": "perm2", "label": "\u7e2e\u6bdb\u77ef\u6b63", "color": "#a04848", "price": 22000}, {"key": "spa", "label": "\u30d8\u30c3\u30c9\u30b9\u30d1", "color": "#6a607a", "price": 5500}]));
-localStorage.setItem('tring_d_2025-02_03_yamashita', JSON.stringify({"cut": 1, "color": 1, "perm": 1, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_04_yamashita', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-02_05_yamashita', JSON.stringify({"cut": 1, "color": 0, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_06_yamashita', JSON.stringify({"cut": 2, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-02_07_yamashita', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_10_yamashita', JSON.stringify({"cut": 0, "color": 2, "perm": 1, "tr": 0, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-02_11_yamashita', JSON.stringify({"cut": 2, "color": 1, "perm": 1, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_12_yamashita', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_13_yamashita', JSON.stringify({"cut": 1, "color": 1, "perm": 1, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_14_yamashita', JSON.stringify({"cut": 2, "color": 2, "perm": 0, "tr": 1, "perm2": 1, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_17_yamashita', JSON.stringify({"cut": 2, "color": 0, "perm": 0, "tr": 1, "perm2": 1, "spa": 1}));
-localStorage.setItem('tring_d_2025-02_18_yamashita', JSON.stringify({"cut": 2, "color": 2, "perm": 0, "tr": 0, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-02_19_yamashita', JSON.stringify({"cut": 2, "color": 0, "perm": 0, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-02_20_yamashita', JSON.stringify({"cut": 1, "color": 0, "perm": 1, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_21_yamashita', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 1, "perm2": 1, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_24_yamashita', JSON.stringify({"cut": 1, "color": 1, "perm": 1, "tr": 1, "perm2": 1, "spa": 1}));
-localStorage.setItem('tring_d_2025-02_25_yamashita', JSON.stringify({"cut": 2, "color": 3, "perm": 0, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_26_yamashita', JSON.stringify({"cut": 2, "color": 2, "perm": 0, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_27_yamashita', JSON.stringify({"cut": 1, "color": 0, "perm": 1, "tr": 0, "perm2": 1, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_28_yamashita', JSON.stringify({"cut": 1, "color": 2, "perm": 1, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-02_03_araki', JSON.stringify({"cut": 2, "color": 0, "perm": 0, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-02_04_araki', JSON.stringify({"cut": 0, "color": 2, "perm": 0, "tr": 0, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-02_05_araki', JSON.stringify({"cut": 1, "color": 2, "perm": 0, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-02_06_araki', JSON.stringify({"cut": 2, "color": 3, "perm": 0, "tr": 1, "perm2": 1, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_07_araki', JSON.stringify({"cut": 1, "color": 2, "perm": 0, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-02_10_araki', JSON.stringify({"cut": 1, "color": 1, "perm": 1, "tr": 1, "perm2": 0, "spa": 2}));
-localStorage.setItem('tring_d_2025-02_11_araki', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_12_araki', JSON.stringify({"cut": 0, "color": 1, "perm": 0, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_13_araki', JSON.stringify({"cut": 1, "color": 2, "perm": 1, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_14_araki', JSON.stringify({"cut": 0, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-02_17_araki', JSON.stringify({"cut": 2, "color": 3, "perm": 0, "tr": 0, "perm2": 1, "spa": 1}));
-localStorage.setItem('tring_d_2025-02_18_araki', JSON.stringify({"cut": 1, "color": 1, "perm": 1, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-02_19_araki', JSON.stringify({"cut": 2, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-02_20_araki', JSON.stringify({"cut": 1, "color": 0, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_21_araki', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-02_24_araki', JSON.stringify({"cut": 0, "color": 2, "perm": 1, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-02_25_araki', JSON.stringify({"cut": 1, "color": 2, "perm": 0, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-02_26_araki', JSON.stringify({"cut": 1, "color": 2, "perm": 0, "tr": 2, "perm2": 1, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_27_araki', JSON.stringify({"cut": 2, "color": 1, "perm": 1, "tr": 2, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_28_araki', JSON.stringify({"cut": 0, "color": 1, "perm": 0, "tr": 0, "perm2": 1, "spa": 1}));
-localStorage.setItem('tring_d_2025-02_03_tomioka', JSON.stringify({"cut": 3, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_04_tomioka', JSON.stringify({"cut": 3, "color": 1, "perm": 0, "tr": 1, "perm2": 1, "spa": 1}));
-localStorage.setItem('tring_d_2025-02_05_tomioka', JSON.stringify({"cut": 2, "color": 1, "perm": 1, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_06_tomioka', JSON.stringify({"cut": 2, "color": 1, "perm": 1, "tr": 0, "perm2": 1, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_07_tomioka', JSON.stringify({"cut": 0, "color": 2, "perm": 1, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-02_10_tomioka', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_11_tomioka', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 0, "perm2": 1, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_12_tomioka', JSON.stringify({"cut": 2, "color": 2, "perm": 0, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_13_tomioka', JSON.stringify({"cut": 2, "color": 1, "perm": 1, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_14_tomioka', JSON.stringify({"cut": 1, "color": 1, "perm": 1, "tr": 1, "perm2": 1, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_17_tomioka', JSON.stringify({"cut": 1, "color": 1, "perm": 1, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_18_tomioka', JSON.stringify({"cut": 1, "color": 0, "perm": 1, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-02_19_tomioka', JSON.stringify({"cut": 1, "color": 1, "perm": 1, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_20_tomioka', JSON.stringify({"cut": 2, "color": 1, "perm": 1, "tr": 1, "perm2": 1, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_21_tomioka', JSON.stringify({"cut": 0, "color": 0, "perm": 0, "tr": 0, "perm2": 1, "spa": 1}));
-localStorage.setItem('tring_d_2025-02_24_tomioka', JSON.stringify({"cut": 2, "color": 0, "perm": 0, "tr": 1, "perm2": 1, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_25_tomioka', JSON.stringify({"cut": 2, "color": 1, "perm": 1, "tr": 0, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-02_26_tomioka', JSON.stringify({"cut": 3, "color": 1, "perm": 0, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_27_tomioka', JSON.stringify({"cut": 1, "color": 0, "perm": 0, "tr": 0, "perm2": 1, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_28_tomioka', JSON.stringify({"cut": 1, "color": 1, "perm": 2, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-02_03_hatanaka', JSON.stringify({"cut": 2, "color": 1, "perm": 0, "tr": 0, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-02_04_hatanaka', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_05_hatanaka', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_06_hatanaka', JSON.stringify({"cut": 2, "color": 1, "perm": 1, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_07_hatanaka', JSON.stringify({"cut": 2, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_10_hatanaka', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_11_hatanaka', JSON.stringify({"cut": 1, "color": 2, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_12_hatanaka', JSON.stringify({"cut": 1, "color": 2, "perm": 1, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-02_13_hatanaka', JSON.stringify({"cut": 2, "color": 1, "perm": 1, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_14_hatanaka', JSON.stringify({"cut": 1, "color": 0, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_17_hatanaka', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_18_hatanaka', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-02_19_hatanaka', JSON.stringify({"cut": 1, "color": 0, "perm": 0, "tr": 0, "perm2": 1, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_20_hatanaka', JSON.stringify({"cut": 1, "color": 1, "perm": 1, "tr": 1, "perm2": 1, "spa": 1}));
-localStorage.setItem('tring_d_2025-02_21_hatanaka', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 1, "perm2": 1, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_24_hatanaka', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_25_hatanaka', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-02_26_hatanaka', JSON.stringify({"cut": 1, "color": 1, "perm": 1, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-02_27_hatanaka', JSON.stringify({"cut": 1, "color": 2, "perm": 0, "tr": 1, "perm2": 1, "spa": 2}));
-localStorage.setItem('tring_d_2025-02_28_hatanaka', JSON.stringify({"cut": 1, "color": 0, "perm": 1, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_03_migihashi', JSON.stringify({"cut": 1, "color": 2, "perm": 0, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_04_migihashi', JSON.stringify({"cut": 0, "color": 0, "perm": 0, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-02_05_migihashi', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 0, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-02_06_migihashi', JSON.stringify({"cut": 1, "color": 2, "perm": 0, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-02_07_migihashi', JSON.stringify({"cut": 2, "color": 0, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_10_migihashi', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-02_11_migihashi', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-02_12_migihashi', JSON.stringify({"cut": 2, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_13_migihashi', JSON.stringify({"cut": 1, "color": 2, "perm": 0, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_14_migihashi', JSON.stringify({"cut": 1, "color": 2, "perm": 1, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_17_migihashi', JSON.stringify({"cut": 1, "color": 0, "perm": 1, "tr": 0, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-02_18_migihashi', JSON.stringify({"cut": 2, "color": 0, "perm": 0, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_19_migihashi', JSON.stringify({"cut": 1, "color": 2, "perm": 0, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_20_migihashi', JSON.stringify({"cut": 1, "color": 0, "perm": 0, "tr": 1, "perm2": 1, "spa": 1}));
-localStorage.setItem('tring_d_2025-02_21_migihashi', JSON.stringify({"cut": 0, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_24_migihashi', JSON.stringify({"cut": 2, "color": 2, "perm": 0, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-02_25_migihashi', JSON.stringify({"cut": 1, "color": 2, "perm": 1, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-02_26_migihashi', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 1, "perm2": 1, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_27_migihashi', JSON.stringify({"cut": 0, "color": 2, "perm": 1, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_28_migihashi', JSON.stringify({"cut": 2, "color": 2, "perm": 0, "tr": 0, "perm2": 1, "spa": 1}));
-localStorage.setItem('tring_d_2025-02_03_fujita', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_04_fujita', JSON.stringify({"cut": 0, "color": 1, "perm": 0, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_05_fujita', JSON.stringify({"cut": 1, "color": 0, "perm": 0, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_06_fujita', JSON.stringify({"cut": 0, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_07_fujita', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_10_fujita', JSON.stringify({"cut": 1, "color": 0, "perm": 0, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_11_fujita', JSON.stringify({"cut": 0, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_12_fujita', JSON.stringify({"cut": 1, "color": 0, "perm": 0, "tr": 0, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-02_13_fujita', JSON.stringify({"cut": 0, "color": 0, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_14_fujita', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_17_fujita', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_18_fujita', JSON.stringify({"cut": 2, "color": 1, "perm": 0, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_19_fujita', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_20_fujita', JSON.stringify({"cut": 0, "color": 0, "perm": 1, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-02_21_fujita', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 0, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-02_24_fujita', JSON.stringify({"cut": 0, "color": 0, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_25_fujita', JSON.stringify({"cut": 0, "color": 0, "perm": 0, "tr": 0, "perm2": 1, "spa": 0}));
-localStorage.setItem('tring_d_2025-02_26_fujita', JSON.stringify({"cut": 1, "color": 0, "perm": 1, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-02_27_fujita', JSON.stringify({"cut": 1, "color": 1, "perm": 1, "tr": 0, "perm2": 1, "spa": 1}));
-localStorage.setItem('tring_d_2025-02_28_fujita', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_03_yamashita', JSON.stringify({"cut": 2, "color": 2, "perm": 0, "tr": 0, "perm2": 1, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_04_yamashita', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 0, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-03_05_yamashita', JSON.stringify({"cut": 1, "color": 0, "perm": 1, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_06_yamashita', JSON.stringify({"cut": 1, "color": 1, "perm": 1, "tr": 0, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-03_07_yamashita', JSON.stringify({"cut": 2, "color": 2, "perm": 0, "tr": 2, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_10_yamashita', JSON.stringify({"cut": 3, "color": 1, "perm": 1, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_11_yamashita', JSON.stringify({"cut": 1, "color": 0, "perm": 1, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-03_12_yamashita', JSON.stringify({"cut": 1, "color": 2, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_13_yamashita', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 1, "perm2": 1, "spa": 1}));
-localStorage.setItem('tring_d_2025-03_14_yamashita', JSON.stringify({"cut": 0, "color": 1, "perm": 0, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_17_yamashita', JSON.stringify({"cut": 2, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_18_yamashita', JSON.stringify({"cut": 0, "color": 2, "perm": 1, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_19_yamashita', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 1, "perm2": 1, "spa": 1}));
-localStorage.setItem('tring_d_2025-03_20_yamashita', JSON.stringify({"cut": 0, "color": 1, "perm": 1, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_21_yamashita', JSON.stringify({"cut": 1, "color": 2, "perm": 0, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_24_yamashita', JSON.stringify({"cut": 3, "color": 2, "perm": 0, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-03_25_yamashita', JSON.stringify({"cut": 1, "color": 2, "perm": 0, "tr": 0, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-03_26_yamashita', JSON.stringify({"cut": 0, "color": 1, "perm": 1, "tr": 0, "perm2": 1, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_27_yamashita', JSON.stringify({"cut": 3, "color": 0, "perm": 1, "tr": 0, "perm2": 1, "spa": 1}));
-localStorage.setItem('tring_d_2025-03_28_yamashita', JSON.stringify({"cut": 2, "color": 3, "perm": 1, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_29_yamashita', JSON.stringify({"cut": 4, "color": 0, "perm": 1, "tr": 2, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-03_31_yamashita', JSON.stringify({"cut": 2, "color": 0, "perm": 0, "tr": 1, "perm2": 1, "spa": 1}));
-localStorage.setItem('tring_d_2025-03_03_araki', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-03_04_araki', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_05_araki', JSON.stringify({"cut": 1, "color": 2, "perm": 1, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_06_araki', JSON.stringify({"cut": 2, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-03_07_araki', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 2, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_10_araki', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_11_araki', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_12_araki', JSON.stringify({"cut": 1, "color": 0, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_13_araki', JSON.stringify({"cut": 1, "color": 2, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_14_araki', JSON.stringify({"cut": 0, "color": 1, "perm": 0, "tr": 2, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-03_17_araki', JSON.stringify({"cut": 1, "color": 3, "perm": 0, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-03_18_araki', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 1, "perm2": 1, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_19_araki', JSON.stringify({"cut": 1, "color": 0, "perm": 1, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-03_20_araki', JSON.stringify({"cut": 0, "color": 4, "perm": 1, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-03_21_araki', JSON.stringify({"cut": 2, "color": 0, "perm": 0, "tr": 1, "perm2": 1, "spa": 1}));
-localStorage.setItem('tring_d_2025-03_24_araki', JSON.stringify({"cut": 1, "color": 2, "perm": 1, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-03_25_araki', JSON.stringify({"cut": 2, "color": 3, "perm": 0, "tr": 1, "perm2": 0, "spa": 2}));
-localStorage.setItem('tring_d_2025-03_26_araki', JSON.stringify({"cut": 1, "color": 2, "perm": 1, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-03_27_araki', JSON.stringify({"cut": 0, "color": 0, "perm": 0, "tr": 0, "perm2": 0, "spa": 2}));
-localStorage.setItem('tring_d_2025-03_28_araki', JSON.stringify({"cut": 1, "color": 3, "perm": 0, "tr": 1, "perm2": 1, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_29_araki', JSON.stringify({"cut": 3, "color": 3, "perm": 1, "tr": 2, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-03_31_araki', JSON.stringify({"cut": 1, "color": 3, "perm": 0, "tr": 0, "perm2": 1, "spa": 2}));
-localStorage.setItem('tring_d_2025-03_03_tomioka', JSON.stringify({"cut": 0, "color": 1, "perm": 1, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_04_tomioka', JSON.stringify({"cut": 1, "color": 0, "perm": 1, "tr": 1, "perm2": 1, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_05_tomioka', JSON.stringify({"cut": 2, "color": 1, "perm": 1, "tr": 1, "perm2": 1, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_06_tomioka', JSON.stringify({"cut": 1, "color": 1, "perm": 1, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_07_tomioka', JSON.stringify({"cut": 2, "color": 0, "perm": 1, "tr": 0, "perm2": 1, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_10_tomioka', JSON.stringify({"cut": 1, "color": 2, "perm": 1, "tr": 0, "perm2": 1, "spa": 1}));
-localStorage.setItem('tring_d_2025-03_11_tomioka', JSON.stringify({"cut": 2, "color": 0, "perm": 0, "tr": 1, "perm2": 1, "spa": 1}));
-localStorage.setItem('tring_d_2025-03_12_tomioka', JSON.stringify({"cut": 0, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_13_tomioka', JSON.stringify({"cut": 2, "color": 1, "perm": 1, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_14_tomioka', JSON.stringify({"cut": 2, "color": 2, "perm": 0, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-03_17_tomioka', JSON.stringify({"cut": 3, "color": 1, "perm": 1, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_18_tomioka', JSON.stringify({"cut": 2, "color": 0, "perm": 0, "tr": 0, "perm2": 1, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_19_tomioka', JSON.stringify({"cut": 4, "color": 1, "perm": 0, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_20_tomioka', JSON.stringify({"cut": 1, "color": 1, "perm": 1, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-03_21_tomioka', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 1, "perm2": 1, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_24_tomioka', JSON.stringify({"cut": 0, "color": 2, "perm": 1, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_25_tomioka', JSON.stringify({"cut": 4, "color": 0, "perm": 1, "tr": 0, "perm2": 1, "spa": 1}));
-localStorage.setItem('tring_d_2025-03_26_tomioka', JSON.stringify({"cut": 1, "color": 1, "perm": 1, "tr": 1, "perm2": 1, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_27_tomioka', JSON.stringify({"cut": 1, "color": 2, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_28_tomioka', JSON.stringify({"cut": 4, "color": 2, "perm": 1, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-03_29_tomioka', JSON.stringify({"cut": 2, "color": 2, "perm": 1, "tr": 0, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-03_31_tomioka', JSON.stringify({"cut": 1, "color": 0, "perm": 0, "tr": 0, "perm2": 1, "spa": 1}));
-localStorage.setItem('tring_d_2025-03_03_hatanaka', JSON.stringify({"cut": 2, "color": 2, "perm": 0, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-03_04_hatanaka', JSON.stringify({"cut": 2, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-03_05_hatanaka', JSON.stringify({"cut": 2, "color": 1, "perm": 0, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_06_hatanaka', JSON.stringify({"cut": 1, "color": 0, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_07_hatanaka', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-03_10_hatanaka', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_11_hatanaka', JSON.stringify({"cut": 0, "color": 1, "perm": 0, "tr": 0, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-03_12_hatanaka', JSON.stringify({"cut": 3, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-03_13_hatanaka', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_14_hatanaka', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_17_hatanaka', JSON.stringify({"cut": 1, "color": 1, "perm": 1, "tr": 0, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-03_18_hatanaka', JSON.stringify({"cut": 1, "color": 2, "perm": 1, "tr": 1, "perm2": 1, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_19_hatanaka', JSON.stringify({"cut": 1, "color": 2, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_20_hatanaka', JSON.stringify({"cut": 0, "color": 1, "perm": 1, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-03_21_hatanaka', JSON.stringify({"cut": 1, "color": 0, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_24_hatanaka', JSON.stringify({"cut": 0, "color": 1, "perm": 0, "tr": 1, "perm2": 1, "spa": 1}));
-localStorage.setItem('tring_d_2025-03_25_hatanaka', JSON.stringify({"cut": 2, "color": 1, "perm": 1, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_26_hatanaka', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_27_hatanaka', JSON.stringify({"cut": 1, "color": 2, "perm": 1, "tr": 1, "perm2": 1, "spa": 1}));
-localStorage.setItem('tring_d_2025-03_28_hatanaka', JSON.stringify({"cut": 3, "color": 1, "perm": 0, "tr": 0, "perm2": 1, "spa": 1}));
-localStorage.setItem('tring_d_2025-03_29_hatanaka', JSON.stringify({"cut": 1, "color": 2, "perm": 1, "tr": 2, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_31_hatanaka', JSON.stringify({"cut": 3, "color": 0, "perm": 2, "tr": 1, "perm2": 1, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_03_migihashi', JSON.stringify({"cut": 0, "color": 2, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_04_migihashi', JSON.stringify({"cut": 1, "color": 2, "perm": 0, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_05_migihashi', JSON.stringify({"cut": 1, "color": 2, "perm": 0, "tr": 0, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-03_06_migihashi', JSON.stringify({"cut": 1, "color": 2, "perm": 0, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-03_07_migihashi', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_10_migihashi', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_11_migihashi', JSON.stringify({"cut": 1, "color": 0, "perm": 0, "tr": 0, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-03_12_migihashi', JSON.stringify({"cut": 2, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-03_13_migihashi', JSON.stringify({"cut": 0, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_14_migihashi', JSON.stringify({"cut": 1, "color": 2, "perm": 1, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-03_17_migihashi', JSON.stringify({"cut": 2, "color": 2, "perm": 1, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_18_migihashi', JSON.stringify({"cut": 1, "color": 0, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_19_migihashi', JSON.stringify({"cut": 2, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_20_migihashi', JSON.stringify({"cut": 1, "color": 1, "perm": 1, "tr": 0, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-03_21_migihashi', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 1, "perm2": 1, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_24_migihashi', JSON.stringify({"cut": 1, "color": 2, "perm": 0, "tr": 0, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-03_25_migihashi', JSON.stringify({"cut": 1, "color": 1, "perm": 1, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-03_26_migihashi', JSON.stringify({"cut": 2, "color": 1, "perm": 0, "tr": 1, "perm2": 1, "spa": 1}));
-localStorage.setItem('tring_d_2025-03_27_migihashi', JSON.stringify({"cut": 1, "color": 0, "perm": 0, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-03_28_migihashi', JSON.stringify({"cut": 2, "color": 0, "perm": 0, "tr": 0, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-03_29_migihashi', JSON.stringify({"cut": 2, "color": 4, "perm": 0, "tr": 1, "perm2": 1, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_31_migihashi', JSON.stringify({"cut": 1, "color": 2, "perm": 1, "tr": 0, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-03_03_fujita', JSON.stringify({"cut": 1, "color": 0, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_04_fujita', JSON.stringify({"cut": 1, "color": 0, "perm": 0, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_05_fujita', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_06_fujita', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-03_07_fujita', JSON.stringify({"cut": 1, "color": 0, "perm": 0, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_10_fujita', JSON.stringify({"cut": 1, "color": 0, "perm": 0, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_11_fujita', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_12_fujita', JSON.stringify({"cut": 0, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_13_fujita', JSON.stringify({"cut": 1, "color": 0, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_14_fujita', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_17_fujita', JSON.stringify({"cut": 1, "color": 0, "perm": 0, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_18_fujita', JSON.stringify({"cut": 0, "color": 2, "perm": 0, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-03_19_fujita', JSON.stringify({"cut": 1, "color": 0, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_20_fujita', JSON.stringify({"cut": 1, "color": 0, "perm": 0, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_21_fujita', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_24_fujita', JSON.stringify({"cut": 0, "color": 0, "perm": 1, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-03_25_fujita', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_26_fujita', JSON.stringify({"cut": 0, "color": 2, "perm": 0, "tr": 1, "perm2": 1, "spa": 1}));
-localStorage.setItem('tring_d_2025-03_27_fujita', JSON.stringify({"cut": 0, "color": 1, "perm": 1, "tr": 0, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-03_28_fujita', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_29_fujita', JSON.stringify({"cut": 1, "color": 0, "perm": 1, "tr": 0, "perm2": 1, "spa": 0}));
-localStorage.setItem('tring_d_2025-03_31_fujita', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-04_01_yamashita', JSON.stringify({"cut": 2, "color": 2, "perm": 1, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_02_yamashita', JSON.stringify({"cut": 2, "color": 1, "perm": 1, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-04_03_yamashita', JSON.stringify({"cut": 0, "color": 1, "perm": 0, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_04_yamashita', JSON.stringify({"cut": 2, "color": 1, "perm": 1, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-04_07_yamashita', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_08_yamashita', JSON.stringify({"cut": 0, "color": 2, "perm": 0, "tr": 0, "perm2": 1, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_09_yamashita', JSON.stringify({"cut": 3, "color": 0, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_10_yamashita', JSON.stringify({"cut": 2, "color": 1, "perm": 0, "tr": 0, "perm2": 1, "spa": 1}));
-localStorage.setItem('tring_d_2025-04_11_yamashita', JSON.stringify({"cut": 1, "color": 1, "perm": 1, "tr": 0, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-04_14_yamashita', JSON.stringify({"cut": 1, "color": 2, "perm": 0, "tr": 0, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-04_15_yamashita', JSON.stringify({"cut": 2, "color": 1, "perm": 1, "tr": 0, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-04_16_yamashita', JSON.stringify({"cut": 1, "color": 0, "perm": 0, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_17_yamashita', JSON.stringify({"cut": 3, "color": 1, "perm": 1, "tr": 1, "perm2": 1, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_18_yamashita', JSON.stringify({"cut": 1, "color": 0, "perm": 0, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_21_yamashita', JSON.stringify({"cut": 0, "color": 1, "perm": 1, "tr": 1, "perm2": 1, "spa": 1}));
-localStorage.setItem('tring_d_2025-04_22_yamashita', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_23_yamashita', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_24_yamashita', JSON.stringify({"cut": 1, "color": 0, "perm": 1, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-04_25_yamashita', JSON.stringify({"cut": 2, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_28_yamashita', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 1, "perm2": 1, "spa": 1}));
-localStorage.setItem('tring_d_2025-04_29_yamashita', JSON.stringify({"cut": 1, "color": 2, "perm": 1, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_30_yamashita', JSON.stringify({"cut": 2, "color": 3, "perm": 0, "tr": 2, "perm2": 1, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_01_araki', JSON.stringify({"cut": 0, "color": 2, "perm": 0, "tr": 2, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-04_02_araki', JSON.stringify({"cut": 1, "color": 0, "perm": 0, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-04_03_araki', JSON.stringify({"cut": 1, "color": 3, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_04_araki', JSON.stringify({"cut": 1, "color": 3, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_07_araki', JSON.stringify({"cut": 2, "color": 1, "perm": 0, "tr": 0, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-04_08_araki', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_09_araki', JSON.stringify({"cut": 0, "color": 2, "perm": 0, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-04_10_araki', JSON.stringify({"cut": 1, "color": 1, "perm": 1, "tr": 0, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-04_11_araki', JSON.stringify({"cut": 0, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-04_14_araki', JSON.stringify({"cut": 2, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_15_araki', JSON.stringify({"cut": 1, "color": 2, "perm": 0, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-04_16_araki', JSON.stringify({"cut": 0, "color": 1, "perm": 1, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-04_17_araki', JSON.stringify({"cut": 2, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 2}));
-localStorage.setItem('tring_d_2025-04_18_araki', JSON.stringify({"cut": 2, "color": 2, "perm": 0, "tr": 1, "perm2": 1, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_21_araki', JSON.stringify({"cut": 0, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_22_araki', JSON.stringify({"cut": 2, "color": 1, "perm": 0, "tr": 0, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-04_23_araki', JSON.stringify({"cut": 1, "color": 0, "perm": 1, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-04_24_araki', JSON.stringify({"cut": 1, "color": 0, "perm": 1, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-04_25_araki', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 2, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_28_araki', JSON.stringify({"cut": 1, "color": 0, "perm": 1, "tr": 1, "perm2": 1, "spa": 1}));
-localStorage.setItem('tring_d_2025-04_29_araki', JSON.stringify({"cut": 1, "color": 3, "perm": 1, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_30_araki', JSON.stringify({"cut": 1, "color": 5, "perm": 0, "tr": 0, "perm2": 2, "spa": 1}));
-localStorage.setItem('tring_d_2025-04_01_tomioka', JSON.stringify({"cut": 2, "color": 2, "perm": 1, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_02_tomioka', JSON.stringify({"cut": 2, "color": 0, "perm": 1, "tr": 0, "perm2": 1, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_03_tomioka', JSON.stringify({"cut": 1, "color": 1, "perm": 1, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-04_04_tomioka', JSON.stringify({"cut": 2, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_07_tomioka', JSON.stringify({"cut": 2, "color": 1, "perm": 1, "tr": 0, "perm2": 1, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_08_tomioka', JSON.stringify({"cut": 2, "color": 1, "perm": 1, "tr": 0, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-04_09_tomioka', JSON.stringify({"cut": 1, "color": 0, "perm": 1, "tr": 0, "perm2": 1, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_10_tomioka', JSON.stringify({"cut": 2, "color": 1, "perm": 1, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_11_tomioka', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_14_tomioka', JSON.stringify({"cut": 1, "color": 0, "perm": 1, "tr": 1, "perm2": 1, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_15_tomioka', JSON.stringify({"cut": 1, "color": 1, "perm": 1, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_16_tomioka', JSON.stringify({"cut": 2, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_17_tomioka', JSON.stringify({"cut": 3, "color": 0, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_18_tomioka', JSON.stringify({"cut": 3, "color": 0, "perm": 0, "tr": 0, "perm2": 1, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_21_tomioka', JSON.stringify({"cut": 1, "color": 1, "perm": 1, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-04_22_tomioka', JSON.stringify({"cut": 1, "color": 1, "perm": 1, "tr": 1, "perm2": 1, "spa": 1}));
-localStorage.setItem('tring_d_2025-04_23_tomioka', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_24_tomioka', JSON.stringify({"cut": 2, "color": 1, "perm": 1, "tr": 0, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-04_25_tomioka', JSON.stringify({"cut": 0, "color": 1, "perm": 0, "tr": 0, "perm2": 1, "spa": 1}));
-localStorage.setItem('tring_d_2025-04_28_tomioka', JSON.stringify({"cut": 1, "color": 2, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_29_tomioka', JSON.stringify({"cut": 1, "color": 1, "perm": 1, "tr": 0, "perm2": 1, "spa": 1}));
-localStorage.setItem('tring_d_2025-04_30_tomioka', JSON.stringify({"cut": 2, "color": 2, "perm": 0, "tr": 0, "perm2": 1, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_01_hatanaka', JSON.stringify({"cut": 1, "color": 2, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_02_hatanaka', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-04_03_hatanaka', JSON.stringify({"cut": 1, "color": 2, "perm": 1, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_04_hatanaka', JSON.stringify({"cut": 1, "color": 0, "perm": 0, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-04_07_hatanaka', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_08_hatanaka', JSON.stringify({"cut": 0, "color": 2, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_09_hatanaka', JSON.stringify({"cut": 2, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-04_10_hatanaka', JSON.stringify({"cut": 1, "color": 1, "perm": 1, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_11_hatanaka', JSON.stringify({"cut": 2, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_14_hatanaka', JSON.stringify({"cut": 1, "color": 1, "perm": 1, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-04_15_hatanaka', JSON.stringify({"cut": 3, "color": 1, "perm": 0, "tr": 1, "perm2": 1, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_16_hatanaka', JSON.stringify({"cut": 0, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-04_17_hatanaka', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 0, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-04_18_hatanaka', JSON.stringify({"cut": 2, "color": 1, "perm": 1, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_21_hatanaka', JSON.stringify({"cut": 3, "color": 1, "perm": 1, "tr": 1, "perm2": 1, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_22_hatanaka', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 0, "perm2": 1, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_23_hatanaka', JSON.stringify({"cut": 2, "color": 0, "perm": 0, "tr": 1, "perm2": 1, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_24_hatanaka', JSON.stringify({"cut": 0, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_25_hatanaka', JSON.stringify({"cut": 2, "color": 1, "perm": 1, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-04_28_hatanaka', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-04_29_hatanaka', JSON.stringify({"cut": 1, "color": 0, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_30_hatanaka', JSON.stringify({"cut": 0, "color": 1, "perm": 1, "tr": 0, "perm2": 1, "spa": 1}));
-localStorage.setItem('tring_d_2025-04_01_migihashi', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 0, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-04_02_migihashi', JSON.stringify({"cut": 1, "color": 0, "perm": 0, "tr": 0, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-04_03_migihashi', JSON.stringify({"cut": 2, "color": 1, "perm": 0, "tr": 0, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-04_04_migihashi', JSON.stringify({"cut": 1, "color": 1, "perm": 1, "tr": 0, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-04_07_migihashi', JSON.stringify({"cut": 2, "color": 2, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_08_migihashi', JSON.stringify({"cut": 0, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-04_09_migihashi', JSON.stringify({"cut": 0, "color": 3, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_10_migihashi', JSON.stringify({"cut": 2, "color": 1, "perm": 1, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_11_migihashi', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 0, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-04_14_migihashi', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-04_15_migihashi', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-04_16_migihashi', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_17_migihashi', JSON.stringify({"cut": 1, "color": 0, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_18_migihashi', JSON.stringify({"cut": 2, "color": 2, "perm": 0, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_21_migihashi', JSON.stringify({"cut": 0, "color": 1, "perm": 1, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-04_22_migihashi', JSON.stringify({"cut": 1, "color": 2, "perm": 0, "tr": 1, "perm2": 1, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_23_migihashi', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_24_migihashi', JSON.stringify({"cut": 1, "color": 1, "perm": 1, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_25_migihashi', JSON.stringify({"cut": 2, "color": 1, "perm": 1, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_28_migihashi', JSON.stringify({"cut": 1, "color": 3, "perm": 0, "tr": 0, "perm2": 1, "spa": 1}));
-localStorage.setItem('tring_d_2025-04_29_migihashi', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 0, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-04_30_migihashi', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 2, "perm2": 1, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_01_fujita', JSON.stringify({"cut": 0, "color": 0, "perm": 0, "tr": 0, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-04_02_fujita', JSON.stringify({"cut": 1, "color": 0, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_03_fujita', JSON.stringify({"cut": 1, "color": 0, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_04_fujita', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_07_fujita', JSON.stringify({"cut": 0, "color": 1, "perm": 0, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_08_fujita', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_09_fujita', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_10_fujita', JSON.stringify({"cut": 1, "color": 0, "perm": 0, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_11_fujita', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-04_14_fujita', JSON.stringify({"cut": 1, "color": 0, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_15_fujita', JSON.stringify({"cut": 0, "color": 1, "perm": 0, "tr": 0, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-04_16_fujita', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_17_fujita', JSON.stringify({"cut": 1, "color": 1, "perm": 0, "tr": 0, "perm2": 0, "spa": 1}));
-localStorage.setItem('tring_d_2025-04_18_fujita', JSON.stringify({"cut": 1, "color": 1, "perm": 1, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_21_fujita', JSON.stringify({"cut": 0, "color": 0, "perm": 0, "tr": 0, "perm2": 1, "spa": 1}));
-localStorage.setItem('tring_d_2025-04_22_fujita', JSON.stringify({"cut": 1, "color": 0, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_24_fujita', JSON.stringify({"cut": 1, "color": 0, "perm": 0, "tr": 0, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_25_fujita', JSON.stringify({"cut": 1, "color": 2, "perm": 1, "tr": 1, "perm2": 1, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_28_fujita', JSON.stringify({"cut": 0, "color": 1, "perm": 0, "tr": 1, "perm2": 0, "spa": 0}));
-localStorage.setItem('tring_d_2025-04_29_fujita', JSON.stringify({"cut": 2, "color": 1, "perm": 1, "tr": 1, "perm2": 0, "spa": 1}));
+function selPair(pair,btn){
+  curPair=pair;
+  document.querySelectorAll(".pair-btn").forEach(b=>b.classList.remove("on"));
+  btn.classList.add("on");
+  const r=FX.rates[pair];const cu=(r.change||"").startsWith("+");
+  const rc=document.getElementById("rc");
+  if(rc)rc.innerHTML=`<div class="rate-row"><div><div class="rate-lbl">Bid / Ask</div><div class="rate-val">${r.bid} <span class="rate-ask">/ ${r.ask}</span></div></div><div style="text-align:right"><div class="rate-lbl">前日比</div><div class="rate-chg" style="color:${cu?CU:CD}">${cu?"▲":"▼"} ${r.change}</div></div></div><div class="rate-foot"><span>レンジ: ${r.range}</span><span>${r.bias}</span></div>`;
 }
-
-goTo(0, false);
-renderAll();
+if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
 </body>
 </html>
